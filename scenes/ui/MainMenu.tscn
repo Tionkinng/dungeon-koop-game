@@ -1,8 +1,12 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
-; Externe Ressourcen: Skript und Pixel-Art-Theme
+; Externe Ressourcen: Skript, Theme, Hintergrundbild und Sprach-Icons
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
 [ext_resource type="Theme" path="res://assets/ui/pixel_theme.tres" id="2"]
+[ext_resource type="Texture2D" uid="uid://pm0miqnykpem" path="res://assets/ui/mainmenu/background.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/language_globe.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/flag_de.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/flag_en.png" id="6"]
 
 ; ============================================================
 ; Haupt-Control-Node – füllt den gesamten Bildschirm (1280x720)
@@ -14,11 +18,12 @@ script = ExtResource("1")
 
 ; --- Hintergrund ---
 ; TextureRect füllt den ganzen Screen (stretch_mode=6 = KEEP_ASPECT_COVERED)
-; Bild hinzufügen: assets/ui/mainmenu/background.png
-; Dann hier eintragen: texture = ExtResource("ID_fuer_background")
+; expand_mode=1 stellt sicher, dass das Bild über den Node-Bereich hinaus wächst
 [node name="Hintergrund" type="TextureRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+texture = ExtResource("3")
+expand_mode = 1
 stretch_mode = 6
 
 ; --- Titel ---
@@ -56,40 +61,116 @@ theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
 
 ; --- Button-Bereich ---
-; VBoxContainer: rechte Seite, vertikal mittig zentriert
-; Position: 80px vom rechten Rand, 280px breit, 300px hoch (4x60px + 3x20px Abstand)
+; VBoxContainer: rechte Haelfte, vertikal mittig zentriert
+; Position: 120px vom rechten Rand, 400px breit, 360px hoch
 [node name="ButtonBereich" type="VBoxContainer" parent="."]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -360.0
-offset_top = -150.0
-offset_right = -80.0
-offset_bottom = 150.0
+offset_left = -520.0
+offset_top = -180.0
+offset_right = -120.0
+offset_bottom = 180.0
 theme_override_constants/separation = 20
 theme = ExtResource("2")
 
 ; --- Button: Spiel starten ---
 [node name="BtnSpielStarten" type="Button" parent="ButtonBereich"]
-custom_minimum_size = Vector2(280, 60)
+custom_minimum_size = Vector2(360, 65)
 size_flags_horizontal = 3
 text = "Spiel starten"
 
 ; --- Button: Koop beitreten ---
 [node name="BtnKoopBeitreten" type="Button" parent="ButtonBereich"]
-custom_minimum_size = Vector2(280, 60)
+custom_minimum_size = Vector2(360, 65)
 size_flags_horizontal = 3
 text = "Koop beitreten"
 
 ; --- Button: Einstellungen ---
 [node name="BtnEinstellungen" type="Button" parent="ButtonBereich"]
-custom_minimum_size = Vector2(280, 60)
+custom_minimum_size = Vector2(360, 65)
 size_flags_horizontal = 3
 text = "Einstellungen"
 
 ; --- Button: Beenden ---
 [node name="BtnBeenden" type="Button" parent="ButtonBereich"]
-custom_minimum_size = Vector2(280, 60)
+custom_minimum_size = Vector2(360, 65)
 size_flags_horizontal = 3
 text = "Beenden"
+
+; ============================================================
+; Sprachauswahl – oben links
+; ============================================================
+
+; --- Weltkugel-Button: 64x64, 20px vom oberen und linken Rand ---
+[node name="SprachButton" type="TextureButton" parent="."]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 84.0
+offset_bottom = 84.0
+texture_normal = ExtResource("4")
+texture_hover = ExtResource("4")
+texture_pressed = ExtResource("4")
+
+; --- Flaggen-Overlay: unten rechts an der Kugel, 24x16px ---
+; mouse_filter=2 (IGNORE) damit Klicks auf den Button durchgehen
+[node name="FlaggeAnzeige" type="TextureRect" parent="SprachButton"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -38.0
+offset_top = -26.0
+offset_right = -2.0
+offset_bottom = -2.0
+texture = ExtResource("5")
+stretch_mode = 0
+mouse_filter = 2
+
+; --- Dropdown-Panel: erscheint direkt unter dem Weltkugel-Button ---
+; visible=false: standardmäßig versteckt, per Klick eingeblendet
+[node name="SprachDropdown" type="Panel" parent="."]
+visible = false
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 14.0
+offset_top = 90.0
+offset_right = 210.0
+offset_bottom = 178.0
+
+; --- VBoxContainer füllt das Panel mit 6px Innenabstand ---
+[node name="VBoxContainer" type="VBoxContainer" parent="SprachDropdown"]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+theme_override_constants/separation = 4
+
+; --- Option: Deutsch ---
+[node name="BtnDeutsch" type="Button" parent="SprachDropdown/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
+text = "  Deutsch"
+icon = ExtResource("5")
+theme = ExtResource("2")
+
+; --- Option: English ---
+[node name="BtnEnglish" type="Button" parent="SprachDropdown/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 36)
+text = "  English"
+icon = ExtResource("6")
+theme = ExtResource("2")
