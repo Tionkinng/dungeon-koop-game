@@ -1,0 +1,66 @@
+# ============================================================
+# .gitignore für Godot 4 Projekte
+# ============================================================
+
+# Godot-spezifische temporäre Dateien und Cache
+.godot/
+*.tmp
+*.translation
+
+# Import-Cache (wird von Godot automatisch neu generiert)
+.import/
+**/*.import
+
+# Android Export
+/android/
+
+# Export-Vorlagen und Build-Artefakte
+build/
+export/
+*.apk
+*.aab
+*.ipa
+*.exe
+*.x86_64
+*.dmg
+*.pck
+
+# Godot UID-Dateien (optional – können generiert werden)
+# *.uid
+
+# macOS Systemdateien
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V7
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JetBrains IDEs (Rider, CLion)
+.idea/
+*.iml
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+logs/
+
+# Umgebungsvariablen (Geheimnisse NIE einchecken!)
+.env
+.env.local
+*.secret
+
+# Firebase Konfiguration mit API-Keys (lokal anlegen, nicht committen)
+google-services.json
+GoogleService-Info.plist
+
+# Photon Konfiguration mit App-ID (lokal anlegen, nicht committen)
+PhotonServerSettings.asset
+
+# Node.js (falls Build-Tools genutzt werden)
+node_modules/
+npm-debug.log

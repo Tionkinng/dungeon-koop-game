@@ -1,0 +1,83 @@
+{
+  "biom": "dungeon",
+  "anzeigename": "Dunkler Kerker",
+  "beschreibung": "Ein finsterer Kerker voller Fallen, Skelette und alter Rätsel.",
+
+  "schwierigkeitsgrade": {
+    "leicht":   { "gegner_multiplikator": 0.75, "schaden_multiplikator": 0.75, "belohnung_multiplikator": 1.0  },
+    "normal":   { "gegner_multiplikator": 1.0,  "schaden_multiplikator": 1.0,  "belohnung_multiplikator": 1.25 },
+    "schwer":   { "gegner_multiplikator": 1.5,  "schaden_multiplikator": 1.5,  "belohnung_multiplikator": 1.75 },
+    "albtraum": { "gegner_multiplikator": 2.0,  "schaden_multiplikator": 2.0,  "belohnung_multiplikator": 2.5  }
+  },
+
+  "gegner": [
+    {
+      "id": "skeleton",
+      "anzeigename": "Skelett",
+      "spawn_gewicht": 60,
+      "max_pro_raum": 4,
+      "lebenspunkte": 40,
+      "schaden": 8,
+      "belohnung_xp": 15,
+      "belohnung_gold": 5
+    },
+    {
+      "id": "skeleton_bogenschuetze",
+      "anzeigename": "Skelett-Bogenschütze",
+      "spawn_gewicht": 25,
+      "max_pro_raum": 2,
+      "lebenspunkte": 25,
+      "schaden": 12,
+      "belohnung_xp": 20,
+      "belohnung_gold": 8
+    },
+    {
+      "id": "dungeon_boss",
+      "anzeigename": "Kerkerwächter",
+      "spawn_gewicht": 0,
+      "ist_boss": true,
+      "lebenspunkte": 300,
+      "schaden": 25,
+      "belohnung_xp": 150,
+      "belohnung_gold": 75
+    }
+  ],
+
+  "tiles": {
+    "tileset_pfad": "res://assets/tilesets/dungeon/",
+    "boden_ids":    [1, 2, 3],
+    "wand_ids":     [10, 11, 12, 13],
+    "decken_ids":   [20, 21],
+    "dekorations_ids": [30, 31, 32, 33, 34],
+    "gefahren_ids": [40, 41]
+  },
+
+  "raetsel": [
+    {
+      "id": "schalter_puzzle",
+      "anzeigename": "Schalter-Rätsel",
+      "beschreibung": "Beide Spieler müssen gleichzeitig Schalter betätigen.",
+      "benoetigt_koop": true,
+      "belohnung": "truhe_selten"
+    },
+    {
+      "id": "druckplatten",
+      "anzeigename": "Druckplatten-Sequenz",
+      "beschreibung": "Druckplatten in der richtigen Reihenfolge aktivieren.",
+      "benoetigt_koop": false,
+      "belohnung": "geheimgang"
+    }
+  ],
+
+  "level_generierung": {
+    "min_raeume":       6,
+    "max_raeume":       12,
+    "boss_raum_immer":  true,
+    "schatz_raeume":    2,
+    "raetsel_raeume":   2,
+    "verbindungstypen": ["tuer", "geheimgang", "bruecke"]
+  },
+
+  "hintergrund_musik": "res://assets/audio/music/dungeon_theme.ogg",
+  "umgebungs_sounds":  ["res://assets/audio/sfx/tropfen.ogg", "res://assets/audio/sfx/wind_kerker.ogg"]
+}

@@ -1,0 +1,83 @@
+{
+  "biom": "cave",
+  "anzeigename": "Kristallhöhle",
+  "beschreibung": "Eine gefährliche Höhle mit Gorillas, Kristallen und verborgenen Schätzen.",
+
+  "schwierigkeitsgrade": {
+    "leicht":   { "gegner_multiplikator": 0.75, "schaden_multiplikator": 0.75, "belohnung_multiplikator": 1.0  },
+    "normal":   { "gegner_multiplikator": 1.0,  "schaden_multiplikator": 1.0,  "belohnung_multiplikator": 1.25 },
+    "schwer":   { "gegner_multiplikator": 1.5,  "schaden_multiplikator": 1.5,  "belohnung_multiplikator": 1.75 },
+    "albtraum": { "gegner_multiplikator": 2.0,  "schaden_multiplikator": 2.0,  "belohnung_multiplikator": 2.5  }
+  },
+
+  "gegner": [
+    {
+      "id": "gorilla",
+      "anzeigename": "Höhlen-Gorilla",
+      "spawn_gewicht": 50,
+      "max_pro_raum": 3,
+      "lebenspunkte": 80,
+      "schaden": 15,
+      "belohnung_xp": 25,
+      "belohnung_gold": 10
+    },
+    {
+      "id": "fledermaus",
+      "anzeigename": "Riesenfledermaus",
+      "spawn_gewicht": 35,
+      "max_pro_raum": 6,
+      "lebenspunkte": 15,
+      "schaden": 6,
+      "belohnung_xp": 8,
+      "belohnung_gold": 3
+    },
+    {
+      "id": "hoehlen_boss",
+      "anzeigename": "Uralter Steingolems",
+      "spawn_gewicht": 0,
+      "ist_boss": true,
+      "lebenspunkte": 450,
+      "schaden": 30,
+      "belohnung_xp": 200,
+      "belohnung_gold": 100
+    }
+  ],
+
+  "tiles": {
+    "tileset_pfad": "res://assets/tilesets/cave/",
+    "boden_ids":    [1, 2, 3, 4],
+    "wand_ids":     [10, 11, 12, 13, 14],
+    "decken_ids":   [20, 21, 22],
+    "dekorations_ids": [30, 31, 32, 33, 34, 35],
+    "gefahren_ids": [40, 41, 42]
+  },
+
+  "raetsel": [
+    {
+      "id": "kristall_aktivierung",
+      "anzeigename": "Kristall-Aktivierung",
+      "beschreibung": "Beide Spieler müssen Kristalle gleichzeitig berühren.",
+      "benoetigt_koop": true,
+      "belohnung": "truhe_episch"
+    },
+    {
+      "id": "sprung_sequenz",
+      "anzeigename": "Sprung-Herausforderung",
+      "beschreibung": "Eine Reihe präziser Sprünge über leuchtende Plattformen.",
+      "benoetigt_koop": false,
+      "belohnung": "selten_waffe"
+    }
+  ],
+
+  "level_generierung": {
+    "min_raeume":       8,
+    "max_raeume":       15,
+    "boss_raum_immer":  true,
+    "schatz_raeume":    3,
+    "raetsel_raeume":   2,
+    "verbindungstypen": ["tunnel", "abgrund", "stalaktiten_bruecke"]
+  },
+
+  "hintergrund_musik": "res://assets/audio/music/cave_theme.ogg",
+  "umgebungs_sounds":  ["res://assets/audio/sfx/tropfen.ogg", "res://assets/audio/sfx/kristall_summen.ogg", "res://assets/audio/sfx/hoehlen_echo.ogg"]
+}
