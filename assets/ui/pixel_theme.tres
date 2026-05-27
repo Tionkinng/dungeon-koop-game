@@ -1,0 +1,105 @@
+[gd_resource type="Theme" load_steps=7 format=3]
+
+; ============================================================
+; Pixel Art Theme – Minecraft-inspiriertes Button-Design
+; Wiederverwendbar für alle UI-Szenen im Projekt
+; ============================================================
+
+; --- Normal: dunkles Steingrau #3a3a3a mit grauem Rand #6a6a6a ---
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
+bg_color = Color(0.227451, 0.227451, 0.227451, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.415686, 0.415686, 0.415686, 1)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+anti_aliased = false
+content_margin_left = 12.0
+content_margin_right = 12.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+
+; --- Hover: heller #5a5a5a – leuchtet beim Darüberfahren auf ---
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+bg_color = Color(0.352941, 0.352941, 0.352941, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.52549, 0.52549, 0.52549, 1)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+anti_aliased = false
+content_margin_left = 12.0
+content_margin_right = 12.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+
+; --- Pressed: noch heller + Text-Versatz nach unten (Pixel-Press-Effekt) ---
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
+bg_color = Color(0.45098, 0.45098, 0.45098, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.6, 0.6, 0.6, 1)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+anti_aliased = false
+content_margin_left = 12.0
+content_margin_right = 12.0
+content_margin_top = 7.0
+content_margin_bottom = 1.0
+
+; --- Focus: transparent – kein sichtbarer Fokus-Rahmen ---
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_focus"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+draw_center = false
+
+; --- Disabled: ausgegrauter Zustand ---
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_disabled"]
+bg_color = Color(0.15, 0.15, 0.15, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.25, 0.25, 0.25, 1)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+anti_aliased = false
+content_margin_left = 12.0
+content_margin_right = 12.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+
+[resource]
+; Button-Zustände
+Button/styles/normal   = SubResource("StyleBoxFlat_normal")
+Button/styles/hover    = SubResource("StyleBoxFlat_hover")
+Button/styles/pressed  = SubResource("StyleBoxFlat_pressed")
+Button/styles/focus    = SubResource("StyleBoxFlat_focus")
+Button/styles/disabled = SubResource("StyleBoxFlat_disabled")
+
+; Schriftfarben
+Button/colors/font_color          = Color(1, 1, 1, 1)
+Button/colors/font_hover_color    = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color  = Color(0.878431, 0.878431, 0.878431, 1)
+Button/colors/font_focus_color    = Color(1, 1, 1, 1)
+Button/colors/font_disabled_color = Color(0.5, 0.5, 0.5, 1)
+
+; Schriftgröße – Pixel Art Stil (Pixel-Font muss als .ttf in assets/ui/ abgelegt werden)
+Button/font_sizes/font_size = 24

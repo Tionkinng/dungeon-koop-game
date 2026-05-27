@@ -13,6 +13,18 @@ config_version=5
 config/name="Dungeon Koop Game"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
+run/main_scene="res://scenes/ui/MainMenu.tscn"
+
+[display]
+
+; Querformat 1280x720 für mobile Geräte
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/mode=0
+window/handheld/orientation=1
+; Canvas-Items-Stretch damit UI sich korrekt auf alle Bildschirmgrößen skaliert
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 
 [physics]
 
@@ -22,3 +34,5 @@ config/icon="res://icon.svg"
 
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
+; Pixel-perfektes Rendering – verhindert unscharfe Texturen bei Pixel Art
+textures/canvas_textures/default_texture_filter=0

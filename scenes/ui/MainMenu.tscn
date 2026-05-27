@@ -1,0 +1,95 @@
+[gd_scene load_steps=3 format=3]
+
+; Externe Ressourcen: Skript und Pixel-Art-Theme
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
+[ext_resource type="Theme" path="res://assets/ui/pixel_theme.tres" id="2"]
+
+; ============================================================
+; Haupt-Control-Node – füllt den gesamten Bildschirm (1280x720)
+; ============================================================
+[node name="MainMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+; --- Hintergrund ---
+; TextureRect füllt den ganzen Screen (stretch_mode=6 = KEEP_ASPECT_COVERED)
+; Bild hinzufügen: assets/ui/mainmenu/background.png
+; Dann hier eintragen: texture = ExtResource("ID_fuer_background")
+[node name="Hintergrund" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+stretch_mode = 6
+
+; --- Titel ---
+; "DUNGEON KOOP" oben mittig mit Schatten-Effekt
+[node name="Titel" type="Label" parent="."]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_top = 40.0
+offset_bottom = 120.0
+text = "DUNGEON KOOP"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 64
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_constants/shadow_as_outline = 0
+
+; --- Untertitel ---
+[node name="Untertitel" type="Label" parent="."]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_top = 116.0
+offset_bottom = 148.0
+text = "Ein 2-Spieler Online Koop Abenteuer"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+
+; --- Button-Bereich ---
+; VBoxContainer: rechte Seite, vertikal mittig zentriert
+; Position: 80px vom rechten Rand, 280px breit, 300px hoch (4x60px + 3x20px Abstand)
+[node name="ButtonBereich" type="VBoxContainer" parent="."]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -150.0
+offset_right = -80.0
+offset_bottom = 150.0
+theme_override_constants/separation = 20
+theme = ExtResource("2")
+
+; --- Button: Spiel starten ---
+[node name="BtnSpielStarten" type="Button" parent="ButtonBereich"]
+custom_minimum_size = Vector2(280, 60)
+size_flags_horizontal = 3
+text = "Spiel starten"
+
+; --- Button: Koop beitreten ---
+[node name="BtnKoopBeitreten" type="Button" parent="ButtonBereich"]
+custom_minimum_size = Vector2(280, 60)
+size_flags_horizontal = 3
+text = "Koop beitreten"
+
+; --- Button: Einstellungen ---
+[node name="BtnEinstellungen" type="Button" parent="ButtonBereich"]
+custom_minimum_size = Vector2(280, 60)
+size_flags_horizontal = 3
+text = "Einstellungen"
+
+; --- Button: Beenden ---
+[node name="BtnBeenden" type="Button" parent="ButtonBereich"]
+custom_minimum_size = Vector2(280, 60)
+size_flags_horizontal = 3
+text = "Beenden"
