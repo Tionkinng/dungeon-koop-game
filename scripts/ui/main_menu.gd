@@ -117,4 +117,18 @@ func _on_einstellungen() -> void:
 
 
 func _on_beenden() -> void:
-	get_tree().quit()
+	if OS.get_name() == "Web":
+		# Im Browser funktioniert quit() nicht – Tab schließen versuchen.
+		# window.close() wird von manchen Browsern blockiert wenn der Tab
+		# nicht per Script geöffnet wurde (z.B. direkte URL-Eingabe).
+		JavaScriptBridge.eval("window.close()")
+		# Fallback: Bildschirm schwärzen mit "Spiel beendet"-Meldung
+		JavaScriptBridge.eval(
+			"document.body.innerHTML = '<div style=\"" +
+			"display:flex;justify-content:center;align-items:center;" +
+			"height:100vh;background:#000;color:#fff;" +
+			"font-family:monospace;font-size:32px;text-align:center;" +
+			"\">Spiel beendet.<br><br>Tab schlie&szlig;en.</div>'"
+		)
+	else:
+		get_tree().quit()
