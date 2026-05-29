@@ -11,10 +11,12 @@ size = Vector2(50, 80)
 script = ExtResource("1")
 
 ; Sprite: 344x324px → scale 0.247 ergibt ~85x80px, zentriert über Kollision
+; flip_h=true = Skeleton schaut standardmäßig nach links
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
 texture = ExtResource("2")
 scale = Vector2(0.247, 0.247)
+flip_h = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("1")
