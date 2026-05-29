@@ -1,8 +1,10 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/game/Player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/ui/mobile_controls_builder.gd" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/Enemy.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/Hud.tscn" id="5"]
 
 ; --- Kollisionsformen ---
 [sub_resource type="RectangleShape2D" id="floor"]
@@ -253,9 +255,24 @@ shape = SubResource("plat_s")
 position = Vector2(160, 640)
 
 ; ============================================================
-; Mobile Controls + Pause-Menü
+; Gegner – verteilt auf Plattform 2, 4 und 6
+; Spawn-Y = Plattform-Y − 52 (halbe Plattformhöhe 12 + halbe Gegner-Höhe 40)
+; ============================================================
+[node name="Gegner1" parent="." instance=ExtResource("4")]
+position = Vector2(580, 388)
+
+[node name="Gegner2" parent="." instance=ExtResource("4")]
+position = Vector2(1200, 388)
+
+[node name="Gegner3" parent="." instance=ExtResource("4")]
+position = Vector2(1820, 408)
+
+; ============================================================
+; Mobile Controls + Pause-Menü + HUD
 ; ============================================================
 [node name="MobileControls" type="CanvasLayer" parent="."]
 script = ExtResource("2")
 
 [node name="PauseMenu" parent="." instance=ExtResource("3")]
+
+[node name="Hud" parent="." instance=ExtResource("5")]

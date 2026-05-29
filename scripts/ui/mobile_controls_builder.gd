@@ -305,7 +305,8 @@ func _touch_begann(id: int, pos: Vector2) -> void:
 		if pos.distance_to(mitte) <= BTN_KLEIN_D / 2.0:
 			_angriff_touch_id = id
 			_leuchte_auf(_btn_angriff, true)
-			print("Angriff!")
+			if spieler:
+				spieler.touch_angriff = true
 			return
 
 	if _interakt_touch_id == -1:

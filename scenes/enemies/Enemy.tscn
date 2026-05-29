@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_ai.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/skeleton/idle.png" id="2"]
+
+; Kollision: 50x80px, zentriert
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(50, 80)
+
+[node name="Enemy" type="CharacterBody2D" groups=["gegner"]]
+script = ExtResource("1")
+
+; Sprite: 344x324px → scale 0.247 ergibt ~85x80px, zentriert über Kollision
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2")
+scale = Vector2(0.247, 0.247)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
+
+; RayCast zeigt 40px nach unten – prüft ob vor dem Gegner noch Boden ist.
+; Position.x wird im Script je nach Laufrichtung angepasst.
+[node name="KantenCheck" type="RayCast2D" parent="."]
+position = Vector2(28, 20)
+target_position = Vector2(0, 50)
+enabled = true
