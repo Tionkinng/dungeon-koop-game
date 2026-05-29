@@ -8,17 +8,17 @@
 
 config_version=5
 
-[autoload]
-
-LanguageManager="*res://scripts/autoload/language_manager.gd"
-AudioManager="*res://scripts/autoload/audio_manager.gd"
-
 [application]
 
 config/name="Dungeon Koop Game"
 run/main_scene="res://scenes/ui/MainMenu.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
+
+[autoload]
+
+LanguageManager="*res://scripts/autoload/language_manager.gd"
+AudioManager="*res://scripts/autoload/audio_manager.gd"
 
 [display]
 
@@ -30,6 +30,19 @@ window/handheld/orientation=1
 [physics]
 
 3d/physics_engine="Jolt Physics"
+
+[input]
+
+angriff={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":88,"key_label":0,"unicode":120,"location":0,"echo":false,"script":null)
+]
+}
+interaktion={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":69,"key_label":0,"unicode":101,"location":0,"echo":false,"script":null)
+]
+}
 
 [rendering]
 

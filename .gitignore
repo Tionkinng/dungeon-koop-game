@@ -17,6 +17,7 @@
 # Export-Vorlagen und Build-Artefakte
 build/
 export/
+exports/
 *.apk
 *.aab
 *.ipa
@@ -24,6 +25,7 @@ export/
 *.x86_64
 *.dmg
 *.pck
+*.wasm
 
 # Godot UID-Dateien (optional – können generiert werden)
 # *.uid

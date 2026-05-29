@@ -99,16 +99,10 @@ func _input(event: InputEvent) -> void:
 # --- Menü-Aktionen ---
 
 func _on_spiel_starten() -> void:
-	# Buttons sperren damit kein Doppelklick möglich ist
 	btn_spiel_starten.disabled = true
-
-	# Musik 1 Sekunde lang ausblenden, danach Szene wechseln
 	AudioManager.stop_music(1.0)
 	await get_tree().create_timer(1.0).timeout
-	# TODO: get_tree().change_scene_to_file("res://scenes/game/Game.tscn")
-
-	# Placeholder: Button wieder freigeben bis Spielszene existiert
-	btn_spiel_starten.disabled = false
+	get_tree().change_scene_to_file("res://scenes/game/TestLevel.tscn")
 
 
 func _on_koop_beitreten() -> void:

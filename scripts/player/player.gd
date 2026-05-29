@@ -1,81 +1,59 @@
 extends CharacterBody2D
 # ============================================================
-# Player – Spieler-Steuerung (Spieler 1 & Spieler 2)
-# ============================================================
-# Zuständig für:
-#   - Bewegung (Laufen, Springen, Doppelsprung)
-#   - Angriffe (Nahkampf, Spezialangriff)
-#   - Lebenspunkte, Schaden nehmen und Tod
-#   - Animationen über AnimatedSprite2D
-#   - Koop-Interaktionen (Spieler heben, wiederbeleben)
-#   - Netzwerk-Synchronisation via NetworkManager
+# Player – Bewegung + Mobile Touch-Steuerung
 # ============================================================
 
-# --- Einstellungen (im Inspektor anpassbar) ---
-@export var spieler_id:        int   = 1       # 1 oder 2
-@export var bewegungs_speed:   float = 280.0
-@export var sprung_kraft:      float = -520.0
-@export var max_lebenspunkte:  int   = 100
+const SCHWERKRAFT       := 980.0
+const LAUF_SPEED        := 300.0
+const SPRUNG_KRAFT      := -550.0
+const BESCHLEUNIGUNG    := 1800.0
+const ABBREMSEN         := 1200.0
 
-# --- Schwerkraft ---
-# Standardwert aus den Projekteinstellungen übernehmen
-var schwerkraft: float = ProjectSettings.get_setting("physics/2d/default_gravity")
+# Touch-Eingabe (wird von MobileControls gesetzt)
+var touch_richtung: float = 0.0
+var touch_sprung:   bool  = false
 
-# --- Zustand ---
-var lebenspunkte:        int  = max_lebenspunkte
-var ist_tot:             bool = false
-var doppelsprung_bereit: bool = false
-var ist_auf_boden:       bool = false
+@onready var sprite: Sprite2D = $Sprite2D
 
-# --- Node-Referenzen ---
-@onready var sprite:    AnimatedSprite2D = $AnimatedSprite2D
-@onready var hitbox:    Area2D           = $Hitbox
-@onready var hurtbox:   Area2D           = $Hurtbox
-
-
-# --- Godot Lifecycle ---
-
-func _ready() -> void:
-	pass # TODO: Spieler-ID zuweisen, Startanimation, Netzwerk-Autorität setzen
 
 func _physics_process(delta: float) -> void:
-	pass # TODO: Schwerkraft anwenden → Eingabe lesen → move_and_slide()
+	# Schwerkraft
+	if not is_on_floor():
+		velocity.y += SCHWERKRAFT * delta
 
-func _process(_delta: float) -> void:
-	pass # TODO: Animationszustand aktualisieren
+	# --- Horizontale Eingabe (Tastatur + Touch) ---
+	var richtung := 0.0
+	if Input.is_action_pressed("ui_left"):
+		richtung = -1.0
+	elif Input.is_action_pressed("ui_right"):
+		richtung = 1.0
+	# Touch überschreibt wenn aktiv
+	if abs(touch_richtung) > 0.2:
+		richtung = touch_richtung
+
+	if richtung != 0.0:
+		velocity.x = move_toward(velocity.x, richtung * LAUF_SPEED, BESCHLEUNIGUNG * delta)
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, ABBREMSEN * delta)
+
+	# Sprite horizontal spiegeln je nach Laufrichtung
+	if richtung < 0.0:
+		sprite.flip_h = true
+	elif richtung > 0.0:
+		sprite.flip_h = false
+
+	# --- Sprung ---
+	var sprung_eingabe := Input.is_action_just_pressed("ui_accept") or touch_sprung
+	touch_sprung = false
+
+	if sprung_eingabe and is_on_floor():
+		velocity.y = SPRUNG_KRAFT
+
+	move_and_slide()
 
 
-# --- Bewegung ---
-
-func _verarbeite_eingabe() -> void:
-	pass # TODO: Input.get_axis("links","rechts") → velocity.x setzen
-
-func _verarbeite_sprung() -> void:
-	pass # TODO: Sprung- und Doppelsprung-Logik
-
-
-# --- Kampf ---
-
-func angreifen() -> void:
-	pass # TODO: Hitbox aktivieren → Schaden an Gegnern in Reichweite
-
-func schaden_nehmen(menge: int, quelle: Node) -> void:
-	pass # TODO: lebenspunkte reduzieren → Rückstoß → Tod prüfen
-
-func _sterben() -> void:
-	pass # TODO: Todesanimation → Wiederbelebe-Phase → NetworkManager informieren
-
-
-# --- Koop ---
-
-func wiederbeleben(von_spieler: Node) -> void:
-	pass # TODO: lebenspunkte zurücksetzen → ist_tot = false → aufstehen
-
-func trage_spieler(ziel: Node) -> void:
-	pass # TODO: Ziel-Spieler als Kind anhängen → gemeinsam bewegen
-
-
-# --- Netzwerk ---
-
-func _sende_position() -> void:
-	pass # TODO: NetworkManager.sync_position() mit aktueller Position aufrufen
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("angriff"):
+		print("Angriff!")
+	if event.is_action_pressed("interaktion"):
+		print("Interaktion!")

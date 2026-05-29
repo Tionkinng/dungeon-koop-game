@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/characters/player1/player1.png" id="2"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(50, 80)
+
+[node name="Player" type="CharacterBody2D" groups=["spieler"]]
+script = ExtResource("1")
+
+; Sprite2D: player1.png auf ~48x80px skaliert (1124x1866 → Faktor 0.04286)
+; texture_filter=1 = Nearest Neighbour für Pixel-Art
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2")
+scale = Vector2(0.04286, 0.04286)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("1")
