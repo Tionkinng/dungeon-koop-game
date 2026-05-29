@@ -14,35 +14,22 @@
 
   <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html, body {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000;
-    color: #fff;
-    touch-action: none;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    -webkit-user-select: none;
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    overflow: hidden; background: #000; color: #fff;
+    touch-action: none; -webkit-tap-highlight-color: transparent;
+    user-select: none; -webkit-user-select: none;
   }
-
   #canvas {
-    position: fixed !important;
-    top: 0 !important; left: 0 !important;
+    position: fixed !important; top: 0 !important; left: 0 !important;
     right: 0 !important; bottom: 0 !important;
     width: 100% !important; height: 100% !important;
     min-width: 100% !important; min-height: 100% !important;
-    display: block !important;
-    outline: none; border: 0;
+    display: block !important; outline: none; border: 0;
     margin: 0 !important; padding: 0 !important;
   }
-
   #status {
-    position: fixed; inset: 0;
-    background: #242424;
+    position: fixed; inset: 0; background: #242424;
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
     visibility: hidden; z-index: 100;
@@ -61,10 +48,8 @@
     line-height: 1.3; overflow: hidden; padding: 1rem;
     text-align: center; z-index: 1;
   }
-
   #start-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.9);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
     z-index: 9999; cursor: pointer;
@@ -77,12 +62,10 @@
   }
   #start-overlay p {
     color: #aaa; font-family: monospace;
-    font-size: clamp(13px, 3vw, 24px);
-    text-align: center;
+    font-size: clamp(13px, 3vw, 24px); text-align: center;
     animation: blinken 1.2s step-end infinite;
   }
   @keyframes blinken { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
   @media screen and (orientation: portrait) {
     html {
       transform: rotate(90deg); transform-origin: left top;
@@ -97,15 +80,12 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-
   <div id="start-overlay">
     <h1>⚔ DUNGEON KOOP ⚔</h1>
     <p>Tippen zum Starten / Tap to Start</p>
   </div>
-
   <canvas id="canvas">Your browser does not support the canvas tag.</canvas>
   <noscript>JavaScript ist erforderlich.</noscript>
-
   <div id="status">
     <img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="index.png" alt="">
     <progress id="status-progress"></progress>
@@ -117,63 +97,47 @@
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11239828,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
-(function () {
-  var so = document.getElementById('status'), sp = document.getElementById('status-progress'), sn = document.getElementById('status-notice');
-  var init = true, sm = '';
-  function setMode(m) {
-    if (sm===m||!init) return;
-    if (m==='hidden') { so.remove(); init=false; return; }
-    so.style.visibility='visible';
-    sp.style.display=(m==='progress')?'block':'none';
-    sn.style.display=(m==='notice')?'block':'none';
-    sm=m;
-  }
-  function setNotice(t) {
-    while(sn.lastChild) sn.removeChild(sn.lastChild);
-    t.split('\n').forEach(function(l){ sn.appendChild(document.createTextNode(l)); sn.appendChild(document.createElement('br')); });
-  }
-  function fail(e) {
-    console.error(e);
-    setNotice(e instanceof Error?e.message:(typeof e==='string'?e:'An unknown error occurred.'));
-    setMode('notice'); init=false;
-  }
+(function(){
+  var so=document.getElementById('status'),sp=document.getElementById('status-progress'),sn=document.getElementById('status-notice');
+  var init=true,sm='';
+  function setMode(m){if(sm===m||!init)return;if(m==='hidden'){so.remove();init=false;return;}so.style.visibility='visible';sp.style.display=(m==='progress')?'block':'none';sn.style.display=(m==='notice')?'block':'none';sm=m;}
+  function setNotice(t){while(sn.lastChild)sn.removeChild(sn.lastChild);t.split('\n').forEach(function(l){sn.appendChild(document.createTextNode(l));sn.appendChild(document.createElement('br'));});}
+  function fail(e){console.error(e);setNotice(e instanceof Error?e.message:(typeof e==='string'?e:'An unknown error occurred.'));setMode('notice');init=false;}
   var missing=Engine.getMissingFeatures({threads:GODOT_THREADS_ENABLED});
-  if (missing.length!==0) {
-    if (GODOT_CONFIG['serviceWorker']&&GODOT_CONFIG['ensureCrossOriginIsolationHeaders']&&'serviceWorker' in navigator) {
-      var p; try{p=navigator.serviceWorker.getRegistration();}catch(e){p=Promise.reject(new Error('SW failed.'));}
+  if(missing.length!==0){
+    if(GODOT_CONFIG['serviceWorker']&&GODOT_CONFIG['ensureCrossOriginIsolationHeaders']&&'serviceWorker' in navigator){
+      var p;try{p=navigator.serviceWorker.getRegistration();}catch(e){p=Promise.reject(new Error('SW failed.'));}
       Promise.race([p.then(function(r){if(r!=null)return Promise.reject(new Error('SW exists.'));return r;}).then(function(){return engine.installServiceWorker();}),new Promise(function(res){setTimeout(res,2000);})])
         .then(function(){window.location.reload();}).catch(function(e){console.error(e);});
-    } else { fail('Error\nFeatures missing:\n'+missing.join('\n')); }
-  } else {
+    }else{fail('Error\nFeatures missing:\n'+missing.join('\n'));}
+  }else{
     setMode('progress');
     engine.startGame({'onProgress':function(c,t){if(c>0&&t>0){sp.value=c;sp.max=t;}else{sp.removeAttribute('value');sp.removeAttribute('max');}}})
       .then(function(){setMode('hidden');},fail);
   }
 }());
   </script>
-
   <script>
-  function canvasAufVollbild() {
-    var c=document.getElementById('canvas'); if(!c) return;
+  function canvasAufVollbild(){
+    var c=document.getElementById('canvas');if(!c)return;
     var vb=document.fullscreenElement||document.webkitFullscreenElement;
-    var w=vb?screen.width:window.innerWidth, h=vb?screen.height:window.innerHeight;
+    var w=vb?screen.width:window.innerWidth,h=vb?screen.height:window.innerHeight;
     c.style.cssText='position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:'+w+'px!important;height:'+h+'px!important;min-width:'+w+'px!important;min-height:'+h+'px!important;display:block!important;outline:none;border:0;margin:0!important;padding:0!important;';
     window.dispatchEvent(new Event('resize'));
   }
-  window.addEventListener('load', canvasAufVollbild);
-  window.addEventListener('resize', canvasAufVollbild);
-  window.addEventListener('orientationchange', function(){ setTimeout(canvasAufVollbild,150); });
-  document.addEventListener('fullscreenchange',       function(){ setTimeout(canvasAufVollbild,100); });
-  document.addEventListener('webkitfullscreenchange', function(){ setTimeout(canvasAufVollbild,100); });
-  window.addEventListener('load', function(){ setTimeout(canvasAufVollbild,500); setTimeout(canvasAufVollbild,1000); setTimeout(canvasAufVollbild,2000); });
+  window.addEventListener('load',canvasAufVollbild);
+  window.addEventListener('resize',canvasAufVollbild);
+  window.addEventListener('orientationchange',function(){setTimeout(canvasAufVollbild,150);});
+  document.addEventListener('fullscreenchange',function(){setTimeout(canvasAufVollbild,100);});
+  document.addEventListener('webkitfullscreenchange',function(){setTimeout(canvasAufVollbild,100);});
+  window.addEventListener('load',function(){setTimeout(canvasAufVollbild,500);setTimeout(canvasAufVollbild,1000);setTimeout(canvasAufVollbild,2000);});
   </script>
-
   <script>
-  window.addEventListener('load', function () {
-    function audioEntsperren() {
+  window.addEventListener('load',function(){
+    function audioEntsperren(){
       var AC=window.AudioContext||window.webkitAudioContext;
-      if(AC){ var ctx=new AC(),buf=ctx.createBuffer(1,1,22050),src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination); src.start(0); ctx.resume(); }
-      if(window.Engine&&typeof Engine.resumeAudioContext==='function') Engine.resumeAudioContext();
+      if(AC){var ctx=new AC(),buf=ctx.createBuffer(1,1,22050),src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);src.start(0);ctx.resume();}
+      if(window.Engine&&typeof Engine.resumeAudioContext==='function')Engine.resumeAudioContext();
       document.removeEventListener('touchstart',audioEntsperren);
       document.removeEventListener('touchend',audioEntsperren);
       document.removeEventListener('click',audioEntsperren);
@@ -183,19 +147,17 @@ const engine = new Engine(GODOT_CONFIG);
     document.addEventListener('click',audioEntsperren,false);
   });
   </script>
-
   <script>
-  function querformatSperren(){ if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(function(){}); }
-  window.addEventListener('load', querformatSperren);
-  window.addEventListener('orientationchange', querformatSperren);
-  document.addEventListener('touchstart', function vollbild(){
+  function querformatSperren(){if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){});}
+  window.addEventListener('load',querformatSperren);
+  window.addEventListener('orientationchange',querformatSperren);
+  document.addEventListener('touchstart',function vollbild(){
     querformatSperren();
-    var el=document.documentElement, p=el.requestFullscreen?el.requestFullscreen():el.webkitRequestFullscreen?el.webkitRequestFullscreen():null;
-    if(p&&p.then) p.then(function(){setTimeout(canvasAufVollbild,50);setTimeout(canvasAufVollbild,200);}).catch(function(){});
+    var el=document.documentElement,p=el.requestFullscreen?el.requestFullscreen():el.webkitRequestFullscreen?el.webkitRequestFullscreen():null;
+    if(p&&p.then)p.then(function(){setTimeout(canvasAufVollbild,50);setTimeout(canvasAufVollbild,200);}).catch(function(){});
     document.removeEventListener('touchstart',vollbild);
   },{passive:true});
-  document.getElementById('start-overlay').addEventListener('click',function(){ this.style.display='none'; canvasAufVollbild(); },{once:true});
+  document.getElementById('start-overlay').addEventListener('click',function(){this.style.display='none';canvasAufVollbild();},{once:true});
   </script>
-
 </body>
 </html>
