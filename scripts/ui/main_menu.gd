@@ -24,7 +24,8 @@ const FLAGGEN: Dictionary = {
 	"en": preload("res://assets/ui/icons/flag_en.png"),
 }
 
-# --- Menü-Buttons ---
+# --- Titel + Buttons ---
+@onready var titel:              Label  = $Titel
 @onready var btn_spiel_starten:  Button = $ButtonBereich/BtnSpielStarten
 @onready var btn_koop_beitreten: Button = $ButtonBereich/BtnKoopBeitreten
 @onready var btn_einstellungen:  Button = $ButtonBereich/BtnEinstellungen
@@ -63,12 +64,12 @@ func _ready() -> void:
 
 # Alle übersetzbaren Texte im Menü neu setzen.
 func _aktualisiere_texte(_lang: String) -> void:
+	titel.text              = LanguageManager.get_text("title")
 	btn_spiel_starten.text  = LanguageManager.get_text("menu_start")
 	btn_koop_beitreten.text = LanguageManager.get_text("menu_join")
 	btn_einstellungen.text  = LanguageManager.get_text("menu_settings")
 	btn_beenden.text        = LanguageManager.get_text("menu_quit")
 	untertitel.text         = LanguageManager.get_text("subtitle")
-	# Titel "DUNGEON KOOP" bleibt sprachunabhängig
 
 	# Flagge auf der Weltkugel aktualisieren
 	var flagge = FLAGGEN.get(LanguageManager.current_lang)
