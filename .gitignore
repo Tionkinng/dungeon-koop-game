@@ -27,6 +27,10 @@ exports/
 *.pck
 *.wasm
 
+# docs/ ist der GitHub Pages Ordner – Binärdateien dort erlauben
+!docs/*.pck
+!docs/*.wasm
+
 # Godot UID-Dateien (optional – können generiert werden)
 # *.uid
 
