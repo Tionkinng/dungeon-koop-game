@@ -3,7 +3,7 @@
 ; Externe Ressourcen: Skript, Theme, Hintergrundbild und Sprach-Icons
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
 [ext_resource type="Theme" path="res://assets/ui/pixel_theme.tres" id="2"]
-[ext_resource type="Texture2D" uid="uid://pm0miqnykpem" path="res://assets/ui/mainmenu/background.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/mainmenu/background.png" id="3"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/language_globe.png" id="4"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/flag_de.png" id="5"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/flag_en.png" id="6"]

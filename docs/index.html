@@ -31,31 +31,21 @@
 
   #canvas {
     position: fixed !important;
-    top:    0 !important;
-    left:   0 !important;
-    right:  0 !important;
-    bottom: 0 !important;
-    width:  100% !important;
-    height: 100% !important;
-    min-width:  100% !important;
-    min-height: 100% !important;
+    top: 0 !important; left: 0 !important;
+    right: 0 !important; bottom: 0 !important;
+    width: 100% !important; height: 100% !important;
+    min-width: 100% !important; min-height: 100% !important;
     display: block !important;
-    outline: none;
-    border: 0;
-    margin: 0 !important;
-    padding: 0 !important;
+    outline: none; border: 0;
+    margin: 0 !important; padding: 0 !important;
   }
 
   #status {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: #242424;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    visibility: hidden;
-    z-index: 100;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    visibility: hidden; z-index: 100;
   }
   #status-splash { max-height: 100%; max-width: 100%; margin: auto; }
   #status-splash.show-image--false  { display: none; }
@@ -73,46 +63,31 @@
   }
 
   #start-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    cursor: pointer;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 9999; cursor: pointer;
   }
   #start-overlay h1 {
-    color: #fff;
-    font-family: monospace;
+    color: #fff; font-family: monospace;
     font-size: clamp(24px, 6vw, 48px);
-    letter-spacing: 4px;
-    text-align: center;
-    margin-bottom: 1rem;
-    text-shadow: 2px 2px #000;
+    letter-spacing: 4px; text-align: center;
+    margin-bottom: 1rem; text-shadow: 2px 2px #000;
   }
   #start-overlay p {
-    color: #aaa;
-    font-family: monospace;
+    color: #aaa; font-family: monospace;
     font-size: clamp(13px, 3vw, 24px);
     text-align: center;
     animation: blinken 1.2s step-end infinite;
   }
-  @keyframes blinken {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0; }
-  }
+  @keyframes blinken { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
   @media screen and (orientation: portrait) {
     html {
-      transform: rotate(90deg);
-      transform-origin: left top;
-      width: 100vh;
-      height: 100vw;
-      position: absolute;
-      top: 100%;
-      left: 0;
+      transform: rotate(90deg); transform-origin: left top;
+      width: 100vh; height: 100vw;
+      position: absolute; top: 100%; left: 0;
     }
   }
   </style>
@@ -139,139 +114,87 @@
 
   <script src="index.js"></script>
   <script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11239892,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11239828,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
-
 (function () {
-  var statusOverlay  = document.getElementById('status');
-  var statusProgress = document.getElementById('status-progress');
-  var statusNotice   = document.getElementById('status-notice');
-  var initializing = true, statusMode = '';
-
-  function setStatusMode(mode) {
-    if (statusMode === mode || !initializing) return;
-    if (mode === 'hidden') { statusOverlay.remove(); initializing = false; return; }
-    statusOverlay.style.visibility = 'visible';
-    statusProgress.style.display = (mode === 'progress') ? 'block' : 'none';
-    statusNotice.style.display   = (mode === 'notice')   ? 'block' : 'none';
-    statusMode = mode;
+  var so = document.getElementById('status'), sp = document.getElementById('status-progress'), sn = document.getElementById('status-notice');
+  var init = true, sm = '';
+  function setMode(m) {
+    if (sm===m||!init) return;
+    if (m==='hidden') { so.remove(); init=false; return; }
+    so.style.visibility='visible';
+    sp.style.display=(m==='progress')?'block':'none';
+    sn.style.display=(m==='notice')?'block':'none';
+    sm=m;
   }
-  function setStatusNotice(text) {
-    while (statusNotice.lastChild) statusNotice.removeChild(statusNotice.lastChild);
-    text.split('\n').forEach(function(l) {
-      statusNotice.appendChild(document.createTextNode(l));
-      statusNotice.appendChild(document.createElement('br'));
-    });
+  function setNotice(t) {
+    while(sn.lastChild) sn.removeChild(sn.lastChild);
+    t.split('\n').forEach(function(l){ sn.appendChild(document.createTextNode(l)); sn.appendChild(document.createElement('br')); });
   }
-  function displayFailureNotice(err) {
-    console.error(err);
-    setStatusNotice(err instanceof Error ? err.message : (typeof err === 'string' ? err : 'An unknown error occurred.'));
-    setStatusMode('notice'); initializing = false;
+  function fail(e) {
+    console.error(e);
+    setNotice(e instanceof Error?e.message:(typeof e==='string'?e:'An unknown error occurred.'));
+    setMode('notice'); init=false;
   }
-
-  var missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
-  if (missing.length !== 0) {
-    if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
-      var swp;
-      try { swp = navigator.serviceWorker.getRegistration(); }
-      catch(e) { swp = Promise.reject(new Error('SW registration failed.')); }
-      Promise.race([
-        swp.then(function(r){ if(r!=null) return Promise.reject(new Error('SW exists.')); return r; })
-           .then(function(){ return engine.installServiceWorker(); }),
-        new Promise(function(res){ setTimeout(res,2000); }),
-      ]).then(function(){ window.location.reload(); })
-       .catch(function(e){ console.error(e); });
-    } else {
-      displayFailureNotice('Error\nFeatures missing:\n' + missing.join('\n'));
-    }
+  var missing=Engine.getMissingFeatures({threads:GODOT_THREADS_ENABLED});
+  if (missing.length!==0) {
+    if (GODOT_CONFIG['serviceWorker']&&GODOT_CONFIG['ensureCrossOriginIsolationHeaders']&&'serviceWorker' in navigator) {
+      var p; try{p=navigator.serviceWorker.getRegistration();}catch(e){p=Promise.reject(new Error('SW failed.'));}
+      Promise.race([p.then(function(r){if(r!=null)return Promise.reject(new Error('SW exists.'));return r;}).then(function(){return engine.installServiceWorker();}),new Promise(function(res){setTimeout(res,2000);})])
+        .then(function(){window.location.reload();}).catch(function(e){console.error(e);});
+    } else { fail('Error\nFeatures missing:\n'+missing.join('\n')); }
   } else {
-    setStatusMode('progress');
-    engine.startGame({
-      'onProgress': function(cur, tot) {
-        if (cur > 0 && tot > 0) { statusProgress.value = cur; statusProgress.max = tot; }
-        else { statusProgress.removeAttribute('value'); statusProgress.removeAttribute('max'); }
-      },
-    }).then(function(){ setStatusMode('hidden'); }, displayFailureNotice);
+    setMode('progress');
+    engine.startGame({'onProgress':function(c,t){if(c>0&&t>0){sp.value=c;sp.max=t;}else{sp.removeAttribute('value');sp.removeAttribute('max');}}})
+      .then(function(){setMode('hidden');},fail);
   }
 }());
   </script>
 
   <script>
-  // Canvas auf exakte Pixel-Dimensionen zwingen damit Godot keine Ränder lässt.
-  // Wird bei load, resize, fullscreenchange und als Sicherheitsnetz aufgerufen.
   function canvasAufVollbild() {
-    var c = document.getElementById('canvas');
-    if (!c) return;
-    var vb = (document.fullscreenElement || document.webkitFullscreenElement);
-    var w  = vb ? screen.width  : window.innerWidth;
-    var h  = vb ? screen.height : window.innerHeight;
-    c.style.cssText =
-      'position:fixed!important;top:0!important;left:0!important;' +
-      'right:0!important;bottom:0!important;' +
-      'width:'  + w + 'px!important;height:' + h + 'px!important;' +
-      'min-width:' + w + 'px!important;min-height:' + h + 'px!important;' +
-      'display:block!important;outline:none;border:0;' +
-      'margin:0!important;padding:0!important;';
+    var c=document.getElementById('canvas'); if(!c) return;
+    var vb=document.fullscreenElement||document.webkitFullscreenElement;
+    var w=vb?screen.width:window.innerWidth, h=vb?screen.height:window.innerHeight;
+    c.style.cssText='position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:'+w+'px!important;height:'+h+'px!important;min-width:'+w+'px!important;min-height:'+h+'px!important;display:block!important;outline:none;border:0;margin:0!important;padding:0!important;';
     window.dispatchEvent(new Event('resize'));
   }
-
-  window.addEventListener('load',              canvasAufVollbild);
-  window.addEventListener('resize',            canvasAufVollbild);
-  window.addEventListener('orientationchange', function(){ setTimeout(canvasAufVollbild, 150); });
-  document.addEventListener('fullscreenchange',       function(){ setTimeout(canvasAufVollbild, 100); });
-  document.addEventListener('webkitfullscreenchange', function(){ setTimeout(canvasAufVollbild, 100); });
-  window.addEventListener('load', function() {
-    setTimeout(canvasAufVollbild, 500);
-    setTimeout(canvasAufVollbild, 1000);
-    setTimeout(canvasAufVollbild, 2000);
-  });
+  window.addEventListener('load', canvasAufVollbild);
+  window.addEventListener('resize', canvasAufVollbild);
+  window.addEventListener('orientationchange', function(){ setTimeout(canvasAufVollbild,150); });
+  document.addEventListener('fullscreenchange',       function(){ setTimeout(canvasAufVollbild,100); });
+  document.addEventListener('webkitfullscreenchange', function(){ setTimeout(canvasAufVollbild,100); });
+  window.addEventListener('load', function(){ setTimeout(canvasAufVollbild,500); setTimeout(canvasAufVollbild,1000); setTimeout(canvasAufVollbild,2000); });
   </script>
 
   <script>
-  // Audio entsperren (Browser Autoplay-Policy)
   window.addEventListener('load', function () {
     function audioEntsperren() {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) {
-        var ctx = new AC(), buf = ctx.createBuffer(1,1,22050), src = ctx.createBufferSource();
-        src.buffer = buf; src.connect(ctx.destination); src.start(0); ctx.resume();
-      }
-      if (window.Engine && typeof Engine.resumeAudioContext === 'function') Engine.resumeAudioContext();
-      document.removeEventListener('touchstart', audioEntsperren);
-      document.removeEventListener('touchend',   audioEntsperren);
-      document.removeEventListener('click',      audioEntsperren);
+      var AC=window.AudioContext||window.webkitAudioContext;
+      if(AC){ var ctx=new AC(),buf=ctx.createBuffer(1,1,22050),src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination); src.start(0); ctx.resume(); }
+      if(window.Engine&&typeof Engine.resumeAudioContext==='function') Engine.resumeAudioContext();
+      document.removeEventListener('touchstart',audioEntsperren);
+      document.removeEventListener('touchend',audioEntsperren);
+      document.removeEventListener('click',audioEntsperren);
     }
-    document.addEventListener('touchstart', audioEntsperren, { passive: true });
-    document.addEventListener('touchend',   audioEntsperren, { passive: true });
-    document.addEventListener('click',      audioEntsperren, false);
+    document.addEventListener('touchstart',audioEntsperren,{passive:true});
+    document.addEventListener('touchend',audioEntsperren,{passive:true});
+    document.addEventListener('click',audioEntsperren,false);
   });
   </script>
 
   <script>
-  // Querformat sperren + Vollbild beim ersten Touch
-  function querformatSperren() {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function(){});
-    }
-  }
-  window.addEventListener('load',              querformatSperren);
+  function querformatSperren(){ if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(function(){}); }
+  window.addEventListener('load', querformatSperren);
   window.addEventListener('orientationchange', querformatSperren);
-
-  document.addEventListener('touchstart', function vollbildAktivieren() {
+  document.addEventListener('touchstart', function vollbild(){
     querformatSperren();
-    var el = document.documentElement;
-    var p = el.requestFullscreen       ? el.requestFullscreen()
-          : el.webkitRequestFullscreen ? el.webkitRequestFullscreen()
-          : null;
-    if (p && p.then) p.then(function(){ setTimeout(canvasAufVollbild,50); setTimeout(canvasAufVollbild,200); }).catch(function(){});
-    document.removeEventListener('touchstart', vollbildAktivieren);
-  }, { passive: true });
-
-  document.getElementById('start-overlay').addEventListener('click', function() {
-    this.style.display = 'none';
-    canvasAufVollbild();
-  }, { once: true });
+    var el=document.documentElement, p=el.requestFullscreen?el.requestFullscreen():el.webkitRequestFullscreen?el.webkitRequestFullscreen():null;
+    if(p&&p.then) p.then(function(){setTimeout(canvasAufVollbild,50);setTimeout(canvasAufVollbild,200);}).catch(function(){});
+    document.removeEventListener('touchstart',vollbild);
+  },{passive:true});
+  document.getElementById('start-overlay').addEventListener('click',function(){ this.style.display='none'; canvasAufVollbild(); },{once:true});
   </script>
 
 </body>

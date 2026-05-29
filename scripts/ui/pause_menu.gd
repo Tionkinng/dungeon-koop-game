@@ -301,7 +301,6 @@ func _kasten(w: float, h: float, eltern: Control) -> Panel:
 	s.border_width_left   = 4; s.border_width_top    = 4
 	s.border_width_right  = 4; s.border_width_bottom = 4
 	s.border_color        = Color(0.42, 0.42, 0.42, 1.0)
-	s.anti_aliased        = false
 	s.content_margin_left = 20; s.content_margin_right  = 20
 	s.content_margin_top  = 16; s.content_margin_bottom = 16
 	p.add_theme_stylebox_override("panel", s)
@@ -361,7 +360,6 @@ func _btn_style(bg: Color, border: Color, gedrueckt: bool = false) -> StyleBoxFl
 	s.border_width_left     = 4; s.border_width_top    = 4
 	s.border_width_right    = 4; s.border_width_bottom = 4
 	s.border_color          = border
-	s.anti_aliased          = false
 	s.content_margin_left   = 12; s.content_margin_right  = 12
 	s.content_margin_top    = 7  if gedrueckt else 4
 	s.content_margin_bottom = 1  if gedrueckt else 4

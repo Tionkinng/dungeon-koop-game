@@ -113,7 +113,6 @@ func _pause_style(bg: Color) -> StyleBoxFlat:
 	s.corner_radius_bottom_left  = 30
 	s.corner_radius_bottom_right = 30
 	s.corner_detail   = 8
-	s.anti_aliased    = false
 	s.border_width_left = 0; s.border_width_top    = 0
 	s.border_width_right = 0; s.border_width_bottom = 0
 	return s
