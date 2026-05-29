@@ -20,6 +20,9 @@ body {
 
 #canvas {
 	display: block;
+	/* Canvas füllt den gesamten Bildschirm – keine schwarzen Balken */
+	width: 100vw !important;
+	height: 100vh !important;
 }
 
 #canvas:focus {
@@ -89,13 +92,56 @@ body {
 	text-align: center;
 	z-index: 1;
 }
+
+/* Start-Overlay: erscheint beim Laden, wird beim ersten Tippen entfernt.
+   Nötig damit der Browser den Audio-Kontext entsperrt (Autoplay-Policy). */
+#start-overlay {
+	position: fixed;
+	top: 0; left: 0;
+	width: 100%; height: 100%;
+	background: rgba(0, 0, 0, 0.88);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	z-index: 9999;
+	cursor: pointer;
+}
+
+#start-overlay h1 {
+	color: white;
+	font-family: monospace;
+	font-size: 48px;
+	letter-spacing: 4px;
+	text-align: center;
+	margin-bottom: 20px;
+	image-rendering: pixelated;
+}
+
+#start-overlay p {
+	color: #aaaaaa;
+	font-family: monospace;
+	font-size: 24px;
+	text-align: center;
+	animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+	0%, 100% { opacity: 1; }
+	50%       { opacity: 0; }
+}
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
-<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
-<link rel="manifest" href="manifest.json">
-
+		<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+		<link rel="manifest" href="manifest.json">
 	</head>
 	<body>
+		<!-- Start-Overlay: Erster Tap entsperrt Audio + Vollbild -->
+		<div id="start-overlay">
+			<h1>⚔ DUNGEON KOOP ⚔</h1>
+			<p>Tippen zum Starten / Tap to Start</p>
+		</div>
+
 		<canvas id="canvas">
 			Your browser does not support the canvas tag.
 		</canvas>
@@ -112,7 +158,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11239524,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11239572,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -175,7 +221,6 @@ const engine = new Engine(GODOT_CONFIG);
 			} catch (err) {
 				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
 			}
-			// There's a chance that installing the service worker would fix the issue
 			Promise.race([
 				serviceWorkerRegistrationPromise.then((registration) => {
 					if (registration != null) {
@@ -183,18 +228,15 @@ const engine = new Engine(GODOT_CONFIG);
 					}
 					return registration;
 				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
 				new Promise((resolve) => {
 					setTimeout(() => resolve(), 2000);
 				}),
 			]).then(() => {
-				// Reload if there was no error.
 				window.location.reload();
 			}).catch((err) => {
 				console.error('Error while registering service worker:', err);
 			});
 		} else {
-			// Display the message as usual
 			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
 			displayFailureNotice(missingMsg + missing.join('\n'));
 		}
@@ -216,6 +258,40 @@ const engine = new Engine(GODOT_CONFIG);
 	}
 }());
 		</script>
+
+		<script>
+		// Start-Overlay entfernen beim ersten Antippen.
+		// Entsperrt den Audio-Kontext (Browser-Autoplay-Policy erfordert
+		// eine User-Geste bevor Audio abgespielt werden darf) und
+		// aktiviert Vollbild + Querformat für Mobile.
+		document.getElementById('start-overlay')
+			.addEventListener('click', function () {
+
+				// Overlay ausblenden
+				this.style.display = 'none';
+
+				// Vollbild anfordern (Android Chrome + Safari)
+				var el = document.documentElement;
+				if (el.requestFullscreen) {
+					el.requestFullscreen();
+				} else if (el.webkitRequestFullscreen) {
+					el.webkitRequestFullscreen();
+				}
+
+				// Querformat erzwingen (schlägt still fehl wenn nicht unterstützt)
+				if (screen.orientation && screen.orientation.lock) {
+					screen.orientation.lock('landscape').catch(function (e) {
+						console.log('Orientation lock:', e);
+					});
+				}
+
+				// Audio-Kontext entsperren damit Godot-Sounds sofort spielen
+				if (typeof AudioContext !== 'undefined') {
+					var audioCtx = new AudioContext();
+					audioCtx.resume();
+				}
+
+			}, { once: true });
+		</script>
 	</body>
 </html>
-
