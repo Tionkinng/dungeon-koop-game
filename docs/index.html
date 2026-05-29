@@ -2,75 +2,55 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-
-  <!--
-    viewport-fit=cover   → Canvas dehnt sich bis hinter iPhone-Notch/Dynamic-Island
-    maximum-scale=1.0    → Kein Browser-Zoom der den Canvas verkleinert
-  -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
                  user-scalable=no, viewport-fit=cover">
-
-  <!-- iOS: Als Web-App auf Homescreen → echter Vollbild-Modus ohne Safari-Chrome -->
-  <meta name="apple-mobile-web-app-capable"            content="yes">
-  <meta name="apple-mobile-web-app-title"              content="Dungeon Koop">
-  <!-- black-translucent: Statusleiste wird transparent, Canvas füllt darunter -->
-  <meta name="apple-mobile-web-app-status-bar-style"   content="black-translucent">
-
-  <!-- Android: Chrome-Vollbild-Modus als installierte Web-App -->
-  <meta name="mobile-web-app-capable" content="yes">
-
-  <!-- Browser-Adressleisten-Farbe auf Android Chrome -->
-  <meta name="theme-color" content="#000000">
-
+  <meta name="apple-mobile-web-app-capable"          content="yes">
+  <meta name="apple-mobile-web-app-title"            content="Dungeon Koop">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable"                content="yes">
+  <meta name="theme-color"                           content="#000000">
   <title>Dungeon Koop</title>
 
   <style>
-  /* ══════════════════════════════════════════════════════════════
-     VOLLBILD-BASIS
-     position:fixed auf html+body verhindert jedes Scrollen und
-     stellt sicher dass kein Element aus dem Viewport herausragt.
-     ══════════════════════════════════════════════════════════════ */
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* HTML + Body: kein Scroll, kein Offset, alles schwarz */
   html, body {
     position: fixed;
-    inset: 0;                        /* top/right/bottom/left = 0 */
+    inset: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
     background: #000;
     color: #fff;
-    touch-action: none;              /* Kein Browser-Scroll während Spielen */
+    touch-action: none;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     CANVAS: Immer vollflächig
-     position:fixed + inset:0 ist zuverlässiger als 100vw/100vh:
-     - Kein Problem mit mobilem Adressleisten-Offset
-     - Kein Scrollbar-Versatz auf Desktop
-     - Funktioniert auch wenn Godot die canvas-Größe setzt
-     ══════════════════════════════════════════════════════════════ */
+  /* Canvas: position:fixed + inset:0 als Basis.
+     JavaScript überschreibt width/height nach Vollbild mit
+     exakten Pixelwerten damit Godot keine Ränder lässt. */
   #canvas {
     position: fixed !important;
-    inset: 0 !important;
-    width: 100% !important;
+    top:    0 !important;
+    left:   0 !important;
+    right:  0 !important;
+    bottom: 0 !important;
+    width:  100% !important;
     height: 100% !important;
+    min-width:  100% !important;
+    min-height: 100% !important;
     display: block !important;
     outline: none;
     border: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     GODOT LADESCREEN (unverändert, von Godot erwartet)
-     ══════════════════════════════════════════════════════════════ */
+  /* Godot Ladescreen */
   #status {
     position: fixed;
     inset: 0;
@@ -82,48 +62,26 @@
     visibility: hidden;
     z-index: 100;
   }
-
   #status-splash {
-    max-height: 100%;
-    max-width: 100%;
-    margin: auto;
+    max-height: 100%; max-width: 100%; margin: auto;
   }
-
   #status-splash.show-image--false  { display: none; }
   #status-splash.fullsize--true     { height: 100%; width: 100%; object-fit: contain; }
   #status-splash.use-filter--false  { image-rendering: pixelated; }
-
   #status-progress, #status-notice  { display: none; }
-
   #status-progress {
-    position: absolute;
-    bottom: 10%;
-    left: 25%;
-    right: 25%;
+    position: absolute; bottom: 10%; left: 25%; right: 25%;
   }
-
   #status-notice {
-    position: absolute;
-    bottom: 5%;
-    left: 2rem;
-    right: 2rem;
-    background: #5b3943;
-    border-radius: 0.5rem;
-    border: 1px solid #9b3943;
-    color: #e0e0e0;
+    position: absolute; bottom: 5%; left: 2rem; right: 2rem;
+    background: #5b3943; border-radius: 0.5rem;
+    border: 1px solid #9b3943; color: #e0e0e0;
     font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-    line-height: 1.3;
-    overflow: hidden;
-    padding: 1rem;
-    text-align: center;
-    z-index: 1;
+    line-height: 1.3; overflow: hidden; padding: 1rem;
+    text-align: center; z-index: 1;
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     TAP-TO-START OVERLAY
-     Pixel-Art Stil, verschwindet beim ersten Tippen.
-     Notwendig damit Audio entsperrt wird (Browser-Autoplay-Policy).
-     ══════════════════════════════════════════════════════════════ */
+  /* Tap-to-Start Overlay */
   #start-overlay {
     position: fixed;
     inset: 0;
@@ -135,18 +93,15 @@
     z-index: 9999;
     cursor: pointer;
   }
-
   #start-overlay h1 {
     color: #fff;
     font-family: monospace;
-    /* clamp: min 24px, bevorzugt 6vw, max 48px → passt auf alle Bildschirmgrößen */
     font-size: clamp(24px, 6vw, 48px);
     letter-spacing: 4px;
     text-align: center;
     margin-bottom: 1rem;
     text-shadow: 2px 2px #000;
   }
-
   #start-overlay p {
     color: #aaa;
     font-family: monospace;
@@ -154,18 +109,12 @@
     text-align: center;
     animation: blinken 1.2s step-end infinite;
   }
-
   @keyframes blinken {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0; }
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     PORTRAIT-FALLBACK
-     Wenn screen.orientation.lock() nicht funktioniert (iPad Safari,
-     Desktop etc.) dreht CSS die gesamte Seite um 90° – das Spiel
-     erscheint dann trotzdem im Querformat.
-     ══════════════════════════════════════════════════════════════ */
+  /* Portrait-Fallback: CSS-Rotation wenn Screen Orientation API fehlt */
   @media screen and (orientation: portrait) {
     html {
       transform: rotate(90deg);
@@ -185,15 +134,12 @@
 </head>
 <body>
 
-  <!-- Tap-to-Start: erstes Tippen entsperrt Audio + aktiviert Vollbild -->
   <div id="start-overlay">
     <h1>⚔ DUNGEON KOOP ⚔</h1>
     <p>Tippen zum Starten / Tap to Start</p>
   </div>
 
-  <canvas id="canvas">
-    Your browser does not support the canvas tag.
-  </canvas>
+  <canvas id="canvas">Your browser does not support the canvas tag.</canvas>
 
   <noscript>JavaScript ist erforderlich.</noscript>
 
@@ -205,7 +151,7 @@
     <div id="status-notice"></div>
   </div>
 
-  <!-- ── Godot Engine (unverändert, von Godot generiert) ────────── -->
+  <!-- Godot Engine (unverändert) -->
   <script src="index.js"></script>
   <script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11240020,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
@@ -216,90 +162,121 @@ const engine = new Engine(GODOT_CONFIG);
   var statusOverlay  = document.getElementById('status');
   var statusProgress = document.getElementById('status-progress');
   var statusNotice   = document.getElementById('status-notice');
-
-  var initializing = true;
-  var statusMode   = '';
+  var initializing = true, statusMode = '';
 
   function setStatusMode(mode) {
-    if (statusMode === mode || !initializing) { return; }
-    if (mode === 'hidden') {
-      statusOverlay.remove();
-      initializing = false;
-      return;
-    }
+    if (statusMode === mode || !initializing) return;
+    if (mode === 'hidden') { statusOverlay.remove(); initializing = false; return; }
     statusOverlay.style.visibility = 'visible';
     statusProgress.style.display = (mode === 'progress') ? 'block' : 'none';
     statusNotice.style.display   = (mode === 'notice')   ? 'block' : 'none';
     statusMode = mode;
   }
-
   function setStatusNotice(text) {
-    while (statusNotice.lastChild) { statusNotice.removeChild(statusNotice.lastChild); }
-    text.split('\n').forEach(function (line) {
-      statusNotice.appendChild(document.createTextNode(line));
+    while (statusNotice.lastChild) statusNotice.removeChild(statusNotice.lastChild);
+    text.split('\n').forEach(function(l) {
+      statusNotice.appendChild(document.createTextNode(l));
       statusNotice.appendChild(document.createElement('br'));
     });
   }
-
   function displayFailureNotice(err) {
     console.error(err);
-    setStatusNotice(err instanceof Error ? err.message :
-                    (typeof err === 'string' ? err : 'An unknown error occurred.'));
-    setStatusMode('notice');
-    initializing = false;
+    setStatusNotice(err instanceof Error ? err.message : (typeof err === 'string' ? err : 'An unknown error occurred.'));
+    setStatusMode('notice'); initializing = false;
   }
 
   var missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
-
   if (missing.length !== 0) {
-    if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders']
-        && 'serviceWorker' in navigator) {
-      var swPromise;
-      try { swPromise = navigator.serviceWorker.getRegistration(); }
-      catch (e) { swPromise = Promise.reject(new Error('Service worker registration failed.')); }
-
+    if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+      var swp;
+      try { swp = navigator.serviceWorker.getRegistration(); }
+      catch(e) { swp = Promise.reject(new Error('SW registration failed.')); }
       Promise.race([
-        swPromise.then(function (reg) {
-          if (reg != null) { return Promise.reject(new Error('Service worker already exists.')); }
-          return reg;
-        }).then(function () { return engine.installServiceWorker(); }),
-        new Promise(function (resolve) { setTimeout(resolve, 2000); }),
-      ]).then(function () {
-        window.location.reload();
-      }).catch(function (e) {
-        console.error('Error while registering service worker:', e);
-      });
+        swp.then(function(r){ if(r!=null) return Promise.reject(new Error('SW exists.')); return r; })
+           .then(function(){ return engine.installServiceWorker(); }),
+        new Promise(function(res){ setTimeout(res,2000); }),
+      ]).then(function(){ window.location.reload(); })
+       .catch(function(e){ console.error(e); });
     } else {
-      displayFailureNotice(
-        'Error\nThe following features required to run Godot projects on the Web are missing:\n'
-        + missing.join('\n'));
+      displayFailureNotice('Error\nFeatures missing:\n' + missing.join('\n'));
     }
   } else {
     setStatusMode('progress');
     engine.startGame({
-      'onProgress': function (current, total) {
-        if (current > 0 && total > 0) {
-          statusProgress.value = current;
-          statusProgress.max   = total;
-        } else {
-          statusProgress.removeAttribute('value');
-          statusProgress.removeAttribute('max');
-        }
+      'onProgress': function(cur, tot) {
+        if (cur > 0 && tot > 0) { statusProgress.value = cur; statusProgress.max = tot; }
+        else { statusProgress.removeAttribute('value'); statusProgress.removeAttribute('max'); }
       },
-    }).then(function () { setStatusMode('hidden'); }, displayFailureNotice);
+    }).then(function(){ setStatusMode('hidden'); }, displayFailureNotice);
   }
 }());
   </script>
 
-  <!-- ── Audio entsperren ─────────────────────────────────────────
-       Browser-Autoplay-Policy: Audio darf erst nach einer User-Geste
-       gestartet werden. Wir lauschen auf 3 Event-Typen für maximale
-       Kompatibilität (touchstart reicht nicht auf allen Geräten).  -->
   <script>
-  window.addEventListener('load', function () {
+  // ═══════════════════════════════════════════════════════════════
+  // CANVAS VOLLBILD-ERZWINGUNG
+  //
+  // Problem: Godot liest Canvas-Dimensionen beim Start. Wenn der
+  // Browser danach in Vollbild wechselt, ändert sich window.innerWidth/
+  // Height – aber Godot hat die alten Werte. Wir zwingen den Canvas
+  // auf exakte Pixelwerte und feuern einen resize-Event damit
+  // Godot (canvasResizePolicy:2) neu skaliert.
+  // ═══════════════════════════════════════════════════════════════
+  function canvasAufVollbild() {
+    var c = document.getElementById('canvas');
+    if (!c) return;
 
+    // Exakte verfügbare Dimensionen ermitteln.
+    // Im Vollbild-Modus: screen.width/height (zuverlässiger als innerWidth/Height).
+    // Ohne Vollbild: window.innerWidth/Height.
+    var vb = (document.fullscreenElement || document.webkitFullscreenElement);
+    var w  = vb ? screen.width  : window.innerWidth;
+    var h  = vb ? screen.height : window.innerHeight;
+
+    // CSS-Stil direkt setzen (überschreibt alles was Godot gesetzt hat)
+    c.style.cssText =
+      'position:fixed!important;' +
+      'top:0!important;left:0!important;' +
+      'right:0!important;bottom:0!important;' +
+      'width:'  + w + 'px!important;' +
+      'height:' + h + 'px!important;' +
+      'min-width:'  + w + 'px!important;' +
+      'min-height:' + h + 'px!important;' +
+      'display:block!important;' +
+      'outline:none;border:0;margin:0!important;padding:0!important;';
+
+    // Resize-Event → Godot's canvasResizePolicy:2 skaliert neu
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  // Bei jedem relevanten Event aufrufen
+  window.addEventListener('load',              canvasAufVollbild);
+  window.addEventListener('resize',            canvasAufVollbild);
+  window.addEventListener('orientationchange', function() {
+    // Kurze Verzögerung damit der Browser neue Dimensionen meldet
+    setTimeout(canvasAufVollbild, 150);
+  });
+
+  // Nach Vollbild-Aktivierung (Chrome/Samsung + Safari)
+  document.addEventListener('fullscreenchange',       function(){ setTimeout(canvasAufVollbild, 100); });
+  document.addEventListener('webkitfullscreenchange', function(){ setTimeout(canvasAufVollbild, 100); });
+
+  // Wiederholung nach 500ms + 1s als Sicherheitsnetz falls Godot
+  // nach dem Start den Canvas-Style überschreibt
+  window.addEventListener('load', function() {
+    setTimeout(canvasAufVollbild, 500);
+    setTimeout(canvasAufVollbild, 1000);
+    setTimeout(canvasAufVollbild, 2000);
+  });
+  </script>
+
+  <script>
+  // ═══════════════════════════════════════════════════════════════
+  // AUDIO ENTSPERREN
+  // Browser-Autoplay-Policy: Audio erst nach User-Geste erlaubt.
+  // ═══════════════════════════════════════════════════════════════
+  window.addEventListener('load', function () {
     function audioEntsperren() {
-      // Leerer Buffer entsperrt den AudioContext zuverlässig
       var AC = window.AudioContext || window.webkitAudioContext;
       if (AC) {
         var ctx = new AC();
@@ -310,51 +287,56 @@ const engine = new Engine(GODOT_CONFIG);
         src.start(0);
         ctx.resume();
       }
-      // Godot-eigenen Audio-Kontext entsperren
       if (window.Engine && typeof Engine.resumeAudioContext === 'function') {
         Engine.resumeAudioContext();
       }
-      // Listener nach einmaligem Aufruf entfernen
       document.removeEventListener('touchstart', audioEntsperren);
       document.removeEventListener('touchend',   audioEntsperren);
       document.removeEventListener('click',      audioEntsperren);
     }
-
     document.addEventListener('touchstart', audioEntsperren, { passive: true });
     document.addEventListener('touchend',   audioEntsperren, { passive: true });
     document.addEventListener('click',      audioEntsperren, false);
   });
   </script>
 
-  <!-- ── Querformat dauerhaft sperren + Vollbild ──────────────────
-       Wird bei load, orientationchange und erstem Touch aufgerufen.
-       CSS-Fallback (@media portrait → rotate) greift wenn die API
-       nicht verfügbar ist (iPad Safari ohne Fullscreen, Desktop).  -->
   <script>
+  // ═══════════════════════════════════════════════════════════════
+  // QUERFORMAT SPERREN + VOLLBILD AKTIVIEREN
+  // ═══════════════════════════════════════════════════════════════
   function querformatSperren() {
     if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function () {
-        /* CSS-Fallback übernimmt – kein Handlungsbedarf */
+      screen.orientation.lock('landscape').catch(function() {
+        /* CSS @media portrait → rotate(90deg) übernimmt als Fallback */
       });
     }
   }
 
-  window.addEventListener('load', querformatSperren);
+  window.addEventListener('load',              querformatSperren);
   window.addEventListener('orientationchange', querformatSperren);
 
-  // Beim ersten Touch: Vollbild anfordern + Querformat sperren
+  // Beim ersten Touch: Vollbild anfordern
   document.addEventListener('touchstart', function vollbildAktivieren() {
     querformatSperren();
     var el = document.documentElement;
-    if      (el.requestFullscreen)            { el.requestFullscreen(); }
-    else if (el.webkitRequestFullscreen)      { el.webkitRequestFullscreen(); }
+    var p  = el.requestFullscreen       ? el.requestFullscreen()
+           : el.webkitRequestFullscreen ? el.webkitRequestFullscreen()
+           : null;
+    // Nach Vollbild-Aktivierung Canvas sofort neu anpassen
+    if (p && p.then) {
+      p.then(function() {
+        setTimeout(canvasAufVollbild, 50);
+        setTimeout(canvasAufVollbild, 200);
+      }).catch(function(){});
+    }
     document.removeEventListener('touchstart', vollbildAktivieren);
   }, { passive: true });
 
-  // Start-Overlay beim Klick/Tap ausblenden
+  // Start-Overlay ausblenden
   document.getElementById('start-overlay')
     .addEventListener('click', function () {
       this.style.display = 'none';
+      canvasAufVollbild();
     }, { once: true });
   </script>
 
