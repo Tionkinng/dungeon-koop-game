@@ -1,0 +1,9 @@
+{
+  "name": "Dungeon Koop",
+  "short_name": "DungeonKoop",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "start_url": "/dungeon-koop-game/",
+  "background_color": "#000000",
+  "theme_color": "#000000"
+}
