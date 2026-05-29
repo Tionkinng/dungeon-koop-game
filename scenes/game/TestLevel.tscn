@@ -5,11 +5,9 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="3"]
 
 ; --- Kollisionsformen ---
-; Boden: 3000px breit
 [sub_resource type="RectangleShape2D" id="floor"]
 size = Vector2(3000, 32)
 
-; Plattformen: drei Standardgrößen
 [sub_resource type="RectangleShape2D" id="plat_l"]
 size = Vector2(240, 24)
 
@@ -19,20 +17,16 @@ size = Vector2(200, 24)
 [sub_resource type="RectangleShape2D" id="plat_s"]
 size = Vector2(160, 24)
 
-; Abschluss-Wand rechts: 32px breit, 800px hoch
 [sub_resource type="RectangleShape2D" id="wand_r"]
 size = Vector2(32, 800)
 
-; Abschluss-Wand links: unsichtbare Sperre damit Spieler nicht rückwärts fällt
 [sub_resource type="RectangleShape2D" id="wand_l"]
 size = Vector2(32, 800)
 
 ; ============================================================
-; Wurzel-Node
-; ============================================================
 [node name="TestLevel" type="Node2D"]
 
-; --- Hintergrund: 3000px breit damit beim Scrollen kein Rand sichtbar wird ---
+; --- Hintergrund ---
 [node name="Hintergrund" type="ColorRect" parent="."]
 offset_left   = 0.0
 offset_top    = 0.0
@@ -41,24 +35,23 @@ offset_bottom = 720.0
 color = Color(0.12, 0.12, 0.14, 1.0)
 
 ; ============================================================
-; Boden – 3000px breit, am unteren Level-Rand
+; Boden – braun, 3000px breit
 ; ============================================================
 [node name="Boden" type="StaticBody2D" parent="."]
 position = Vector2(1500, 704)
 
 [node name="ColorRect" type="ColorRect" parent="Boden"]
 offset_left   = -1500.0
-offset_top    =  -16.0
-offset_right  =  1500.0
-offset_bottom =  16.0
-color = Color(0.35, 0.25, 0.15, 1.0)
+offset_top    = -16.0
+offset_right  = 1500.0
+offset_bottom = 16.0
+color = Color(0.55, 0.38, 0.18, 1.0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Boden"]
 shape = SubResource("floor")
 
 ; ============================================================
-; Abschluss-Wand rechts bei x=3000
-; (unsichtbar, hält den Spieler im Level)
+; Abschluss-Wand rechts (dunkelbraun, sichtbar)
 ; ============================================================
 [node name="WandRechts" type="StaticBody2D" parent="."]
 position = Vector2(3016, 360)
@@ -66,16 +59,14 @@ position = Vector2(3016, 360)
 [node name="ColorRect" type="ColorRect" parent="WandRechts"]
 offset_left   = -16.0
 offset_top    = -400.0
-offset_right  =  16.0
-offset_bottom =  400.0
-color = Color(0.25, 0.18, 0.10, 1.0)
+offset_right  = 16.0
+offset_bottom = 400.0
+color = Color(0.40, 0.25, 0.10, 1.0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WandRechts"]
 shape = SubResource("wand_r")
 
-; ============================================================
-; Abschluss-Wand links bei x=0
-; ============================================================
+; Wand links (unsichtbar, reine Kollision)
 [node name="WandLinks" type="StaticBody2D" parent="."]
 position = Vector2(-16, 360)
 
@@ -83,95 +74,188 @@ position = Vector2(-16, 360)
 shape = SubResource("wand_l")
 
 ; ============================================================
-; Plattformen – verteilt über 3000px Breite
-; Höhen variieren zwischen 320 und 580 für Sprung-Herausforderung
+; Plattformen – helle Farben damit sie gut sichtbar sind
+; Jede Plattform hat einen hellen Hauptblock + dunkleren Schatten
 ; ============================================================
 
-; P1 – Stufe 1 (früh, niedrig)
+; P1 – x=300, y=560 (erste Stufe, groß)
 [node name="Plattform1" type="StaticBody2D" parent="."]
 position = Vector2(300, 560)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform1"]
-offset_left=-120.0; offset_top=-12.0; offset_right=120.0; offset_bottom=12.0
-color = Color(0.40, 0.30, 0.18, 1.0)
+offset_left   = -120.0
+offset_top    = -12.0
+offset_right  = 120.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform1"]
+offset_left   = -120.0
+offset_top    = -12.0
+offset_right  = 120.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform1"]
 shape = SubResource("plat_l")
 
-; P2 – höher, erfordert einen Sprung nach oben
+; P2 – x=600, y=440 (mittlere Höhe)
 [node name="Plattform2" type="StaticBody2D" parent="."]
 position = Vector2(600, 440)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform2"]
-offset_left=-100.0; offset_top=-12.0; offset_right=100.0; offset_bottom=12.0
-color = Color(0.38, 0.28, 0.16, 1.0)
+offset_left   = -100.0
+offset_top    = -12.0
+offset_right  = 100.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform2"]
+offset_left   = -100.0
+offset_top    = -12.0
+offset_right  = 100.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform2"]
 shape = SubResource("plat_m")
 
-; P3 – kleine Plattform, präziser Sprung nötig
+; P3 – x=880, y=340 (hoch, klein)
 [node name="Plattform3" type="StaticBody2D" parent="."]
 position = Vector2(880, 340)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform3"]
-offset_left=-80.0; offset_top=-12.0; offset_right=80.0; offset_bottom=12.0
-color = Color(0.36, 0.26, 0.14, 1.0)
+offset_left   = -80.0
+offset_top    = -12.0
+offset_right  = 80.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform3"]
+offset_left   = -80.0
+offset_top    = -12.0
+offset_right  = 80.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform3"]
 shape = SubResource("plat_s")
 
-; P4 – breite Plattform als Verschnaufpause
+; P4 – x=1150, y=500 (Verschnaufpause, groß)
 [node name="Plattform4" type="StaticBody2D" parent="."]
 position = Vector2(1150, 500)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform4"]
-offset_left=-120.0; offset_top=-12.0; offset_right=120.0; offset_bottom=12.0
-color = Color(0.40, 0.30, 0.18, 1.0)
+offset_left   = -120.0
+offset_top    = -12.0
+offset_right  = 120.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform4"]
+offset_left   = -120.0
+offset_top    = -12.0
+offset_right  = 120.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform4"]
 shape = SubResource("plat_l")
 
-; P5 – hoch oben, größte Sprungherausforderung der ersten Hälfte
+; P5 – x=1480, y=330 (höchste Plattform erste Hälfte)
 [node name="Plattform5" type="StaticBody2D" parent="."]
 position = Vector2(1480, 330)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform5"]
-offset_left=-100.0; offset_top=-12.0; offset_right=100.0; offset_bottom=12.0
-color = Color(0.38, 0.28, 0.16, 1.0)
+offset_left   = -100.0
+offset_top    = -12.0
+offset_right  = 100.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform5"]
+offset_left   = -100.0
+offset_top    = -12.0
+offset_right  = 100.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform5"]
 shape = SubResource("plat_m")
 
-; P6 – mittlere Höhe, zweite Level-Hälfte beginnt
+; P6 – x=1800, y=460 (zweite Hälfte, mittel)
 [node name="Plattform6" type="StaticBody2D" parent="."]
 position = Vector2(1800, 460)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform6"]
-offset_left=-80.0; offset_top=-12.0; offset_right=80.0; offset_bottom=12.0
-color = Color(0.36, 0.26, 0.14, 1.0)
+offset_left   = -80.0
+offset_top    = -12.0
+offset_right  = 80.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform6"]
+offset_left   = -80.0
+offset_top    = -12.0
+offset_right  = 80.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform6"]
 shape = SubResource("plat_s")
 
-; P7 – breite Plattform nach langer Laufstrecke
+; P7 – x=2150, y=380 (breite Plattform)
 [node name="Plattform7" type="StaticBody2D" parent="."]
 position = Vector2(2150, 380)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform7"]
-offset_left=-120.0; offset_top=-12.0; offset_right=120.0; offset_bottom=12.0
-color = Color(0.40, 0.30, 0.18, 1.0)
+offset_left   = -120.0
+offset_top    = -12.0
+offset_right  = 120.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform7"]
+offset_left   = -120.0
+offset_top    = -12.0
+offset_right  = 120.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform7"]
 shape = SubResource("plat_l")
 
-; P8 – kleine Plattform kurz vor Level-Ende
+; P8 – x=2550, y=460 (kurz vor Level-Ende)
 [node name="Plattform8" type="StaticBody2D" parent="."]
 position = Vector2(2550, 460)
+
 [node name="ColorRect" type="ColorRect" parent="Plattform8"]
-offset_left=-80.0; offset_top=-12.0; offset_right=80.0; offset_bottom=12.0
-color = Color(0.36, 0.26, 0.14, 1.0)
+offset_left   = -80.0
+offset_top    = -12.0
+offset_right  = 80.0
+offset_bottom = 12.0
+color = Color(0.70, 0.52, 0.28, 1.0)
+
+[node name="Rand" type="ColorRect" parent="Plattform8"]
+offset_left   = -80.0
+offset_top    = -12.0
+offset_right  = 80.0
+offset_bottom = -8.0
+color = Color(0.85, 0.70, 0.42, 1.0)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Plattform8"]
 shape = SubResource("plat_s")
 
 ; ============================================================
-; Spieler (Spawn links unten)
+; Spieler
 ; ============================================================
 [node name="Player" parent="." instance=ExtResource("1")]
 position = Vector2(160, 640)
 
 ; ============================================================
-; Mobile Controls (CanvasLayer layer=10)
+; Mobile Controls + Pause-Menü
 ; ============================================================
 [node name="MobileControls" type="CanvasLayer" parent="."]
 script = ExtResource("2")
 
-; ============================================================
-; Pause-Menü (CanvasLayer layer=20)
-; ============================================================
 [node name="PauseMenu" parent="." instance=ExtResource("3")]
