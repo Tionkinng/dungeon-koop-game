@@ -17,6 +17,9 @@ var _fade_tween: Tween = null
 # Ziel-Lautstärke in dB – wird aus Einstellungen geladen (Standard: -10 dB)
 var _ziel_lautstaerke_db: float = -10.0
 
+# SFX-Lautstärke 0–100 % (für zukünftige Soundeffekte)
+var _sfx_lautstaerke_percent: float = 80.0
+
 
 func _ready() -> void:
 	# Eigenen AudioStreamPlayer erstellen – lebt als Kind des Singletons
@@ -88,23 +91,39 @@ func is_music_playing() -> bool:
 	return _player.playing
 
 
+# Setzt SFX-Lautstärke (0–100 %) und speichert sie.
+func set_sfx_volume_percent(p: float) -> void:
+	_sfx_lautstaerke_percent = clampf(p, 0.0, 100.0)
+	# SFX-Bus steuern wenn vorhanden (für zukünftige Sounds)
+	var bus_idx := AudioServer.get_bus_index("SFX")
+	if bus_idx >= 0:
+		var db := linear_to_db(max(_sfx_lautstaerke_percent / 100.0, 0.0001))
+		AudioServer.set_bus_volume_db(bus_idx, db)
+	_speichere_einstellungen()
+
+
+# Gibt die SFX-Lautstärke (0–100 %) zurück.
+func get_sfx_volume_percent() -> float:
+	return _sfx_lautstaerke_percent
+
+
 # ============================================================
 # Persistenz
 # ============================================================
 
 func _speichere_einstellungen() -> void:
 	var cfg := ConfigFile.new()
-	# Bestehende Einstellungen laden bevor wir überschreiben
-	# (damit andere Sektionen wie "language" erhalten bleiben)
 	cfg.load(SAVE_PATH)
-	cfg.set_value("audio", "music_volume_db", _ziel_lautstaerke_db)
+	cfg.set_value("audio", "music_volume_db",     _ziel_lautstaerke_db)
+	cfg.set_value("audio", "sfx_volume_percent",  _sfx_lautstaerke_percent)
 	cfg.save(SAVE_PATH)
 
 
 func _lade_einstellungen() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(SAVE_PATH) == OK:
-		_ziel_lautstaerke_db = cfg.get_value("audio", "music_volume_db", -10.0)
+		_ziel_lautstaerke_db      = cfg.get_value("audio", "music_volume_db",    -10.0)
+		_sfx_lautstaerke_percent  = cfg.get_value("audio", "sfx_volume_percent",  80.0)
 
 
 # ============================================================

@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1"]
+
+; PauseMenu: CanvasLayer mit layer=20 (über MobileControls layer=10).
+; Alle Nodes werden prozedural in pause_menu.gd aufgebaut.
+; process_mode = ALWAYS wird im Script gesetzt.
+[node name="PauseMenu" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1")

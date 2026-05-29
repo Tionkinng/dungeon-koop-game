@@ -31,6 +31,9 @@ const STICK_GROESSE  := 60.0    # Durchmesser des Sticks
 const JOY_MAX_AUST   := 50.0    # Max. Stick-Auslenkung in Pixeln
 const TOT_ZONE       := 0.20    # 20 % Totzone
 
+# --- Pause-Button ---
+var _btn_pause: Button
+
 # --- Action-Buttons ---
 var _btn_sprung:   Panel
 var _btn_angriff:  Panel
@@ -65,7 +68,65 @@ func _ready() -> void:
 
 	_baue_joystick(bildschirm)
 	_baue_action_buttons(bildschirm)
+	_baue_pause_button(bildschirm)
 	call_deferred("_suche_spieler")
+
+
+# ============================================================
+# Pause-Button (oben links, 60x60)
+# process_mode = ALWAYS damit er auch während Pause reagiert
+# ============================================================
+func _baue_pause_button(bildschirm: Control) -> void:
+	_btn_pause = Button.new()
+	_btn_pause.text = "☰"
+	_btn_pause.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_btn_pause.offset_left   = 20.0
+	_btn_pause.offset_top    = 20.0
+	_btn_pause.offset_right  = 80.0
+	_btn_pause.offset_bottom = 80.0
+	_btn_pause.process_mode  = PROCESS_MODE_ALWAYS
+
+	# Halb-transparenter runder Hintergrund (Pixel-Art)
+	var s := _pause_style(Color(0.12, 0.12, 0.14, 0.55))
+	var s_hover    := _pause_style(Color(0.25, 0.25, 0.28, 0.75))
+	var s_pressed  := _pause_style(Color(0.40, 0.40, 0.43, 0.90))
+	var s_focus    := StyleBoxFlat.new()
+	s_focus.draw_center = false
+
+	_btn_pause.add_theme_stylebox_override("normal",  s)
+	_btn_pause.add_theme_stylebox_override("hover",   s_hover)
+	_btn_pause.add_theme_stylebox_override("pressed", s_pressed)
+	_btn_pause.add_theme_stylebox_override("focus",   s_focus)
+	_btn_pause.add_theme_font_size_override("font_size", 28)
+	_btn_pause.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.85))
+
+	bildschirm.add_child(_btn_pause)
+	_btn_pause.pressed.connect(_on_pause_gedrueckt)
+
+
+func _pause_style(bg: Color) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = bg
+	# Abgerundete Ecken (30 = halbe Größe → Kreis-Effekt)
+	s.corner_radius_top_left     = 30
+	s.corner_radius_top_right    = 30
+	s.corner_radius_bottom_left  = 30
+	s.corner_radius_bottom_right = 30
+	s.corner_detail   = 8
+	s.anti_aliased    = false
+	s.border_width_left = 0; s.border_width_top    = 0
+	s.border_width_right = 0; s.border_width_bottom = 0
+	return s
+
+
+func _on_pause_gedrueckt() -> void:
+	var pm: Node = get_tree().get_first_node_in_group("pause_menu")
+	if pm == null:
+		return
+	if get_tree().paused:
+		pm.schliessen()
+	else:
+		pm.oeffnen()
 
 
 func _suche_spieler() -> void:
