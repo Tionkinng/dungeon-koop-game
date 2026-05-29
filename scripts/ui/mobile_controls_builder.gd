@@ -179,13 +179,19 @@ func _baue_action_buttons(eltern: Control) -> void:
 	_label(_btn_sprung, "▲\nSPRUNG", 14)
 	eltern.add_child(_btn_sprung)
 
-	# Mathematische Positionierung relativ zum Sprung-Mittelpunkt
+	# Direkte Pixel-Offsets relativ zum Sprung-Mittelpunkt (sm_r, sm_b).
+	# Negative dy = nach oben (Bildschirm-Y zeigt nach unten).
+	#
+	# Angriff (A):   170 px links, 60 px höher  → 4-Uhr-Position
+	# Interakt (E):   95 px links, 152 px höher → 2-Uhr-Position
+	#
+	# Abstand zwischen den Mittelpunkten: √(75²+92²) ≈ 119 px
+	# → Lücke zwischen Rändern: 119 − 90 ≈ 29 px  (≥ 30 px Ziel erfüllt)
 	var halb := BTN_KLEIN_D / 2.0
 
-	# Angriff – 210°
-	var w_a  := deg_to_rad(210.0)
-	var dx_a := cos(w_a) * BTN_ABSTAND   # ≈ −138.6  (nach links)
-	var dy_a := sin(w_a) * BTN_ABSTAND   # ≈  −80.0  (nach oben)
+	# Angriff: 170 px links, 60 px höher
+	var dx_a := -170.0
+	var dy_a :=  -60.0
 
 	_btn_angriff = _kreis_panel(FARBE_ANGRIFF, BTN_KLEIN_D, 12)
 	_btn_angriff.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -196,10 +202,10 @@ func _baue_action_buttons(eltern: Control) -> void:
 	_label(_btn_angriff, "⚔\nA", 16)
 	eltern.add_child(_btn_angriff)
 
-	# Interakt – 240°
-	var w_i  := deg_to_rad(240.0)
-	var dx_i := cos(w_i) * BTN_ABSTAND   # ≈  −80.0  (nach links)
-	var dy_i := sin(w_i) * BTN_ABSTAND   # ≈ −138.6  (nach oben)
+	# Interakt: 95 px links, 152 px höher
+	# (minimal von 100/140 verschoben um ≥ 30 px Lücke sicherzustellen)
+	var dx_i :=  -95.0
+	var dy_i := -152.0
 
 	_btn_interakt = _kreis_panel(FARBE_INTERAKT, BTN_KLEIN_D, 12)
 	_btn_interakt.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
