@@ -1,258 +1,362 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-		<title>Dungeon Koop Game</title>
-		<style>
-html, body, #canvas {
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
+<html lang="de">
+<head>
+  <meta charset="utf-8">
 
-html, body {
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-	background: #000;
-	touch-action: none;
-	color: white;
-}
+  <!--
+    viewport-fit=cover   → Canvas dehnt sich bis hinter iPhone-Notch/Dynamic-Island
+    maximum-scale=1.0    → Kein Browser-Zoom der den Canvas verkleinert
+  -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
+                 user-scalable=no, viewport-fit=cover">
 
-#canvas {
-	display: block;
-	width: 100vw !important;
-	height: 100vh !important;
-}
+  <!-- iOS: Als Web-App auf Homescreen → echter Vollbild-Modus ohne Safari-Chrome -->
+  <meta name="apple-mobile-web-app-capable"            content="yes">
+  <meta name="apple-mobile-web-app-title"              content="Dungeon Koop">
+  <!-- black-translucent: Statusleiste wird transparent, Canvas füllt darunter -->
+  <meta name="apple-mobile-web-app-status-bar-style"   content="black-translucent">
 
-#canvas:focus { outline: none; }
+  <!-- Android: Chrome-Vollbild-Modus als installierte Web-App -->
+  <meta name="mobile-web-app-capable" content="yes">
 
-#status, #status-splash, #status-progress {
-	position: absolute;
-	left: 0;
-	right: 0;
-}
+  <!-- Browser-Adressleisten-Farbe auf Android Chrome -->
+  <meta name="theme-color" content="#000000">
 
-#status, #status-splash { top: 0; bottom: 0; }
+  <title>Dungeon Koop</title>
 
-#status {
-	background-color: #242424;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	visibility: hidden;
-}
+  <style>
+  /* ══════════════════════════════════════════════════════════════
+     VOLLBILD-BASIS
+     position:fixed auf html+body verhindert jedes Scrollen und
+     stellt sicher dass kein Element aus dem Viewport herausragt.
+     ══════════════════════════════════════════════════════════════ */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-#status-splash { max-height: 100%; max-width: 100%; margin: auto; }
-#status-splash.show-image--false  { display: none; }
-#status-splash.fullsize--true     { height: 100%; width: 100%; object-fit: contain; }
-#status-splash.use-filter--false  { image-rendering: pixelated; }
-#status-progress, #status-notice  { display: none; }
-#status-progress { bottom: 10%; width: 50%; margin: 0 auto; }
+  html, body {
+    position: fixed;
+    inset: 0;                        /* top/right/bottom/left = 0 */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+    touch-action: none;              /* Kein Browser-Scroll während Spielen */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
-#status-notice {
-	background-color: #5b3943;
-	border-radius: 0.5rem;
-	border: 1px solid #9b3943;
-	color: #e0e0e0;
-	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
-	padding: 1rem;
-	text-align: center;
-	z-index: 1;
-}
+  /* ══════════════════════════════════════════════════════════════
+     CANVAS: Immer vollflächig
+     position:fixed + inset:0 ist zuverlässiger als 100vw/100vh:
+     - Kein Problem mit mobilem Adressleisten-Offset
+     - Kein Scrollbar-Versatz auf Desktop
+     - Funktioniert auch wenn Godot die canvas-Größe setzt
+     ══════════════════════════════════════════════════════════════ */
+  #canvas {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    outline: none;
+    border: 0;
+  }
 
-#start-overlay {
-	position: fixed;
-	top: 0; left: 0;
-	width: 100%; height: 100%;
-	background: rgba(0, 0, 0, 0.88);
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	z-index: 9999;
-	cursor: pointer;
-}
+  /* ══════════════════════════════════════════════════════════════
+     GODOT LADESCREEN (unverändert, von Godot erwartet)
+     ══════════════════════════════════════════════════════════════ */
+  #status {
+    position: fixed;
+    inset: 0;
+    background: #242424;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    z-index: 100;
+  }
 
-#start-overlay h1 {
-	color: white;
-	font-family: monospace;
-	font-size: 48px;
-	letter-spacing: 4px;
-	text-align: center;
-	margin-bottom: 20px;
-	image-rendering: pixelated;
-}
+  #status-splash {
+    max-height: 100%;
+    max-width: 100%;
+    margin: auto;
+  }
 
-#start-overlay p {
-	color: #aaaaaa;
-	font-family: monospace;
-	font-size: 24px;
-	text-align: center;
-	animation: blink 1.2s infinite;
-}
+  #status-splash.show-image--false  { display: none; }
+  #status-splash.fullsize--true     { height: 100%; width: 100%; object-fit: contain; }
+  #status-splash.use-filter--false  { image-rendering: pixelated; }
 
-@keyframes blink {
-	0%, 100% { opacity: 1; }
-	50%       { opacity: 0; }
-}
+  #status-progress, #status-notice  { display: none; }
 
-/* Querformat-Fallback: CSS-Rotation wenn die Screen Orientation API fehlt */
-@media screen and (orientation: portrait) {
-	html {
-		transform: rotate(90deg);
-		transform-origin: left top;
-		width: 100vh;
-		height: 100vw;
-		position: absolute;
-		top: 100%;
-		left: 0;
-	}
-}
-		</style>
-		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
-		<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
-		<link rel="manifest" href="manifest.json">
-	</head>
-	<body>
-		<div id="start-overlay">
-			<h1>⚔ DUNGEON KOOP ⚔</h1>
-			<p>Tippen zum Starten / Tap to Start</p>
-		</div>
+  #status-progress {
+    position: absolute;
+    bottom: 10%;
+    left: 25%;
+    right: 25%;
+  }
 
-		<canvas id="canvas">
-			Your browser does not support the canvas tag.
-		</canvas>
+  #status-notice {
+    position: absolute;
+    bottom: 5%;
+    left: 2rem;
+    right: 2rem;
+    background: #5b3943;
+    border-radius: 0.5rem;
+    border: 1px solid #9b3943;
+    color: #e0e0e0;
+    font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+    line-height: 1.3;
+    overflow: hidden;
+    padding: 1rem;
+    text-align: center;
+    z-index: 1;
+  }
 
-		<noscript>Your browser does not support JavaScript.</noscript>
+  /* ══════════════════════════════════════════════════════════════
+     TAP-TO-START OVERLAY
+     Pixel-Art Stil, verschwindet beim ersten Tippen.
+     Notwendig damit Audio entsperrt wird (Browser-Autoplay-Policy).
+     ══════════════════════════════════════════════════════════════ */
+  #start-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    cursor: pointer;
+  }
 
-		<div id="status">
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="index.png" alt="">
-			<progress id="status-progress"></progress>
-			<div id="status-notice"></div>
-		</div>
+  #start-overlay h1 {
+    color: #fff;
+    font-family: monospace;
+    /* clamp: min 24px, bevorzugt 6vw, max 48px → passt auf alle Bildschirmgrößen */
+    font-size: clamp(24px, 6vw, 48px);
+    letter-spacing: 4px;
+    text-align: center;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px #000;
+  }
 
-		<script src="index.js"></script>
-		<script>
+  #start-overlay p {
+    color: #aaa;
+    font-family: monospace;
+    font-size: clamp(13px, 3vw, 24px);
+    text-align: center;
+    animation: blinken 1.2s step-end infinite;
+  }
+
+  @keyframes blinken {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PORTRAIT-FALLBACK
+     Wenn screen.orientation.lock() nicht funktioniert (iPad Safari,
+     Desktop etc.) dreht CSS die gesamte Seite um 90° – das Spiel
+     erscheint dann trotzdem im Querformat.
+     ══════════════════════════════════════════════════════════════ */
+  @media screen and (orientation: portrait) {
+    html {
+      transform: rotate(90deg);
+      transform-origin: left top;
+      width: 100vh;
+      height: 100vw;
+      position: absolute;
+      top: 100%;
+      left: 0;
+    }
+  }
+  </style>
+
+  <link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png">
+  <link rel="apple-touch-icon" href="index.apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <!-- Tap-to-Start: erstes Tippen entsperrt Audio + aktiviert Vollbild -->
+  <div id="start-overlay">
+    <h1>⚔ DUNGEON KOOP ⚔</h1>
+    <p>Tippen zum Starten / Tap to Start</p>
+  </div>
+
+  <canvas id="canvas">
+    Your browser does not support the canvas tag.
+  </canvas>
+
+  <noscript>JavaScript ist erforderlich.</noscript>
+
+  <div id="status">
+    <img id="status-splash"
+         class="show-image--true fullsize--true use-filter--true"
+         src="index.png" alt="">
+    <progress id="status-progress"></progress>
+    <div id="status-notice"></div>
+  </div>
+
+  <!-- ── Godot Engine (unverändert, von Godot generiert) ────────── -->
+  <script src="index.js"></script>
+  <script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11240020,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
 (function () {
-	const statusOverlay = document.getElementById('status');
-	const statusProgress = document.getElementById('status-progress');
-	const statusNotice   = document.getElementById('status-notice');
-	let initializing = true;
-	let statusMode   = '';
+  var statusOverlay  = document.getElementById('status');
+  var statusProgress = document.getElementById('status-progress');
+  var statusNotice   = document.getElementById('status-notice');
 
-	function setStatusMode(mode) {
-		if (statusMode === mode || !initializing) { return; }
-		if (mode === 'hidden') { statusOverlay.remove(); initializing = false; return; }
-		statusOverlay.style.visibility = 'visible';
-		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
-		statusNotice.style.display   = mode === 'notice'   ? 'block' : 'none';
-		statusMode = mode;
-	}
+  var initializing = true;
+  var statusMode   = '';
 
-	function setStatusNotice(text) {
-		while (statusNotice.lastChild) { statusNotice.removeChild(statusNotice.lastChild); }
-		text.split('\n').forEach(function (line) {
-			statusNotice.appendChild(document.createTextNode(line));
-			statusNotice.appendChild(document.createElement('br'));
-		});
-	}
+  function setStatusMode(mode) {
+    if (statusMode === mode || !initializing) { return; }
+    if (mode === 'hidden') {
+      statusOverlay.remove();
+      initializing = false;
+      return;
+    }
+    statusOverlay.style.visibility = 'visible';
+    statusProgress.style.display = (mode === 'progress') ? 'block' : 'none';
+    statusNotice.style.display   = (mode === 'notice')   ? 'block' : 'none';
+    statusMode = mode;
+  }
 
-	function displayFailureNotice(err) {
-		console.error(err);
-		setStatusNotice(err instanceof Error ? err.message : (typeof err === 'string' ? err : 'An unknown error occurred.'));
-		setStatusMode('notice');
-		initializing = false;
-	}
+  function setStatusNotice(text) {
+    while (statusNotice.lastChild) { statusNotice.removeChild(statusNotice.lastChild); }
+    text.split('\n').forEach(function (line) {
+      statusNotice.appendChild(document.createTextNode(line));
+      statusNotice.appendChild(document.createElement('br'));
+    });
+  }
 
-	const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+  function displayFailureNotice(err) {
+    console.error(err);
+    setStatusNotice(err instanceof Error ? err.message :
+                    (typeof err === 'string' ? err : 'An unknown error occurred.'));
+    setStatusMode('notice');
+    initializing = false;
+  }
 
-	if (missing.length !== 0) {
-		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
-			let p;
-			try { p = navigator.serviceWorker.getRegistration(); }
-			catch (e) { p = Promise.reject(new Error('Service worker registration failed.')); }
-			Promise.race([
-				p.then(function (r) {
-					if (r != null) { return Promise.reject(new Error('Service worker already exists.')); }
-					return r;
-				}).then(function () { return engine.installServiceWorker(); }),
-				new Promise(function (resolve) { setTimeout(resolve, 2000); }),
-			]).then(function () { window.location.reload(); })
-			 .catch(function (e) { console.error('Error while registering service worker:', e); });
-		} else {
-			displayFailureNotice('Error\nThe following features required to run Godot projects on the Web are missing:\n' + missing.join('\n'));
-		}
-	} else {
-		setStatusMode('progress');
-		engine.startGame({
-			'onProgress': function (current, total) {
-				if (current > 0 && total > 0) { statusProgress.value = current; statusProgress.max = total; }
-				else { statusProgress.removeAttribute('value'); statusProgress.removeAttribute('max'); }
-			},
-		}).then(function () { setStatusMode('hidden'); }, displayFailureNotice);
-	}
+  var missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+
+  if (missing.length !== 0) {
+    if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders']
+        && 'serviceWorker' in navigator) {
+      var swPromise;
+      try { swPromise = navigator.serviceWorker.getRegistration(); }
+      catch (e) { swPromise = Promise.reject(new Error('Service worker registration failed.')); }
+
+      Promise.race([
+        swPromise.then(function (reg) {
+          if (reg != null) { return Promise.reject(new Error('Service worker already exists.')); }
+          return reg;
+        }).then(function () { return engine.installServiceWorker(); }),
+        new Promise(function (resolve) { setTimeout(resolve, 2000); }),
+      ]).then(function () {
+        window.location.reload();
+      }).catch(function (e) {
+        console.error('Error while registering service worker:', e);
+      });
+    } else {
+      displayFailureNotice(
+        'Error\nThe following features required to run Godot projects on the Web are missing:\n'
+        + missing.join('\n'));
+    }
+  } else {
+    setStatusMode('progress');
+    engine.startGame({
+      'onProgress': function (current, total) {
+        if (current > 0 && total > 0) {
+          statusProgress.value = current;
+          statusProgress.max   = total;
+        } else {
+          statusProgress.removeAttribute('value');
+          statusProgress.removeAttribute('max');
+        }
+      },
+    }).then(function () { setStatusMode('hidden'); }, displayFailureNotice);
+  }
 }());
-		</script>
+  </script>
 
-		<!-- Audio entsperren: Browser Autoplay-Policy erfordert eine User-Geste.
-		     touchstart + touchend + click abdecken damit auch schnelle Taps wirken. -->
-		<script>
-		window.addEventListener('load', function () {
-			function audioEntsperren() {
-				var AC = window.AudioContext || window.webkitAudioContext;
-				if (AC) {
-					var ctx    = new AC();
-					var buffer = ctx.createBuffer(1, 1, 22050);
-					var source = ctx.createBufferSource();
-					source.buffer = buffer;
-					source.connect(ctx.destination);
-					source.start(0);
-					ctx.resume();
-				}
-				if (window.Engine && typeof Engine.resumeAudioContext === 'function') {
-					Engine.resumeAudioContext();
-				}
-				document.removeEventListener('touchstart', audioEntsperren);
-				document.removeEventListener('touchend',   audioEntsperren);
-				document.removeEventListener('click',      audioEntsperren);
-			}
-			document.addEventListener('touchstart', audioEntsperren, false);
-			document.addEventListener('touchend',   audioEntsperren, false);
-			document.addEventListener('click',      audioEntsperren, false);
-		});
-		</script>
+  <!-- ── Audio entsperren ─────────────────────────────────────────
+       Browser-Autoplay-Policy: Audio darf erst nach einer User-Geste
+       gestartet werden. Wir lauschen auf 3 Event-Typen für maximale
+       Kompatibilität (touchstart reicht nicht auf allen Geräten).  -->
+  <script>
+  window.addEventListener('load', function () {
 
-		<!-- Querformat dauerhaft sperren + Vollbild beim ersten Touch -->
-		<script>
-		function querformatSperren() {
-			if (screen.orientation && screen.orientation.lock) {
-				screen.orientation.lock('landscape').catch(function (e) {
-					console.log('Orientation lock nicht verfügbar – CSS Fallback aktiv', e);
-				});
-			}
-		}
-		window.addEventListener('orientationchange', querformatSperren);
-		window.addEventListener('load', querformatSperren);
+    function audioEntsperren() {
+      // Leerer Buffer entsperrt den AudioContext zuverlässig
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        var ctx = new AC();
+        var buf = ctx.createBuffer(1, 1, 22050);
+        var src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(ctx.destination);
+        src.start(0);
+        ctx.resume();
+      }
+      // Godot-eigenen Audio-Kontext entsperren
+      if (window.Engine && typeof Engine.resumeAudioContext === 'function') {
+        Engine.resumeAudioContext();
+      }
+      // Listener nach einmaligem Aufruf entfernen
+      document.removeEventListener('touchstart', audioEntsperren);
+      document.removeEventListener('touchend',   audioEntsperren);
+      document.removeEventListener('click',      audioEntsperren);
+    }
 
-		document.addEventListener('touchstart', function () {
-			querformatSperren();
-			var el = document.documentElement;
-			if (el.requestFullscreen)            { el.requestFullscreen(); }
-			else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
-		}, { once: true });
+    document.addEventListener('touchstart', audioEntsperren, { passive: true });
+    document.addEventListener('touchend',   audioEntsperren, { passive: true });
+    document.addEventListener('click',      audioEntsperren, false);
+  });
+  </script>
 
-		document.getElementById('start-overlay')
-			.addEventListener('click', function () { this.style.display = 'none'; }, { once: true });
-		</script>
-	</body>
+  <!-- ── Querformat dauerhaft sperren + Vollbild ──────────────────
+       Wird bei load, orientationchange und erstem Touch aufgerufen.
+       CSS-Fallback (@media portrait → rotate) greift wenn die API
+       nicht verfügbar ist (iPad Safari ohne Fullscreen, Desktop).  -->
+  <script>
+  function querformatSperren() {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(function () {
+        /* CSS-Fallback übernimmt – kein Handlungsbedarf */
+      });
+    }
+  }
+
+  window.addEventListener('load', querformatSperren);
+  window.addEventListener('orientationchange', querformatSperren);
+
+  // Beim ersten Touch: Vollbild anfordern + Querformat sperren
+  document.addEventListener('touchstart', function vollbildAktivieren() {
+    querformatSperren();
+    var el = document.documentElement;
+    if      (el.requestFullscreen)            { el.requestFullscreen(); }
+    else if (el.webkitRequestFullscreen)      { el.webkitRequestFullscreen(); }
+    document.removeEventListener('touchstart', vollbildAktivieren);
+  }, { passive: true });
+
+  // Start-Overlay beim Klick/Tap ausblenden
+  document.getElementById('start-overlay')
+    .addEventListener('click', function () {
+      this.style.display = 'none';
+    }, { once: true });
+  </script>
+
+</body>
 </html>
