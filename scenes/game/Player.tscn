@@ -18,3 +18,17 @@ scale = Vector2(0.04286, 0.04286)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("1")
+
+; ============================================================
+; Kamera folgt dem Spieler
+; zoom=2.0 → Spieler wirkt größer, Level näher
+; position_smoothing → sanftes Nachfolgen
+; Limits verhindern dass die Kamera über Level-Ränder scrollt
+; ============================================================
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2.0, 2.0)
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+limit_left = 0
+limit_right = 3000
+limit_bottom = 750
