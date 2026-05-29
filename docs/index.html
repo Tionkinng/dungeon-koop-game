@@ -2,25 +2,29 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<!-- orientation=landscape: Hinweis an den Browser, kein hartes Lock -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
 		<title>Dungeon Koop Game</title>
 		<style>
+/* ── Basis-Reset (Godot-Standard) ─────────────────────────── */
 html, body, #canvas {
 	margin: 0;
 	padding: 0;
 	border: 0;
 }
 
-body {
-	color: white;
-	background-color: black;
+html, body {
+	width: 100%;
+	height: 100%;
 	overflow: hidden;
-	touch-action: none;
+	background: #000;
+	touch-action: none;   /* Verhindert Browser-Scroll beim Spielen */
+	color: white;
 }
 
+/* ── Canvas: füllt immer den gesamten Bildschirm ──────────── */
 #canvas {
 	display: block;
-	/* Canvas füllt den gesamten Bildschirm – keine schwarzen Balken */
 	width: 100vw !important;
 	height: 100vh !important;
 }
@@ -29,6 +33,7 @@ body {
 	outline: none;
 }
 
+/* ── Godot Lade-Overlay ───────────────────────────────────── */
 #status, #status-splash, #status-progress {
 	position: absolute;
 	left: 0;
@@ -55,23 +60,11 @@ body {
 	margin: auto;
 }
 
-#status-splash.show-image--false {
-	display: none;
-}
+#status-splash.show-image--false   { display: none; }
+#status-splash.fullsize--true      { height: 100%; width: 100%; object-fit: contain; }
+#status-splash.use-filter--false   { image-rendering: pixelated; }
 
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
-
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
+#status-progress, #status-notice   { display: none; }
 
 #status-progress {
 	bottom: 10%;
@@ -93,8 +86,7 @@ body {
 	z-index: 1;
 }
 
-/* Start-Overlay: erscheint beim Laden, wird beim ersten Tippen entfernt.
-   Nötig damit der Browser den Audio-Kontext entsperrt (Autoplay-Policy). */
+/* ── Start-Overlay (Tap-to-Start, Pixel-Art Stil) ─────────── */
 #start-overlay {
 	position: fixed;
 	top: 0; left: 0;
@@ -130,13 +122,28 @@ body {
 	0%, 100% { opacity: 1; }
 	50%       { opacity: 0; }
 }
+
+/* ── Querformat-Fallback per CSS-Rotation ─────────────────────
+   Wenn das Gerät trotzdem im Hochformat bleibt (z.B. iPad ohne
+   Fullscreen-API), dreht die gesamte Seite um 90°.           */
+@media screen and (orientation: portrait) {
+	html {
+		transform: rotate(90deg);
+		transform-origin: left top;
+		width: 100vh;
+		height: 100vw;
+		position: absolute;
+		top: 100%;
+		left: 0;
+	}
+}
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 		<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 		<link rel="manifest" href="manifest.json">
 	</head>
 	<body>
-		<!-- Start-Overlay: Erster Tap entsperrt Audio + Vollbild -->
+		<!-- Tap-to-Start Overlay: visueller Einstieg + Audio-Trigger -->
 		<div id="start-overlay">
 			<h1>⚔ DUNGEON KOOP ⚔</h1>
 			<p>Tippen zum Starten / Tap to Start</p>
@@ -156,6 +163,7 @@ body {
 			<div id="status-notice"></div>
 		</div>
 
+		<!-- ── Godot Engine (unverändert, von Godot generiert) ── -->
 		<script src="index.js"></script>
 		<script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11239572,"index.wasm":37700666},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
@@ -171,9 +179,7 @@ const engine = new Engine(GODOT_CONFIG);
 	let statusMode = '';
 
 	function setStatusMode(mode) {
-		if (statusMode === mode || !initializing) {
-			return;
-		}
+		if (statusMode === mode || !initializing) { return; }
 		if (mode === 'hidden') {
 			statusOverlay.remove();
 			initializing = false;
@@ -181,16 +187,13 @@ const engine = new Engine(GODOT_CONFIG);
 		}
 		statusOverlay.style.visibility = 'visible';
 		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
-		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusNotice.style.display   = mode === 'notice'   ? 'block' : 'none';
 		statusMode = mode;
 	}
 
 	function setStatusNotice(text) {
-		while (statusNotice.lastChild) {
-			statusNotice.removeChild(statusNotice.lastChild);
-		}
-		const lines = text.split('\n');
-		lines.forEach((line) => {
+		while (statusNotice.lastChild) { statusNotice.removeChild(statusNotice.lastChild); }
+		text.split('\n').forEach(function (line) {
 			statusNotice.appendChild(document.createTextNode(line));
 			statusNotice.appendChild(document.createElement('br'));
 		});
@@ -198,20 +201,14 @@ const engine = new Engine(GODOT_CONFIG);
 
 	function displayFailureNotice(err) {
 		console.error(err);
-		if (err instanceof Error) {
-			setStatusNotice(err.message);
-		} else if (typeof err === 'string') {
-			setStatusNotice(err);
-		} else {
-			setStatusNotice('An unknown error occurred.');
-		}
+		if (err instanceof Error)       { setStatusNotice(err.message); }
+		else if (typeof err === 'string') { setStatusNotice(err); }
+		else                             { setStatusNotice('An unknown error occurred.'); }
 		setStatusMode('notice');
 		initializing = false;
 	}
 
-	const missing = Engine.getMissingFeatures({
-		threads: GODOT_THREADS_ENABLED,
-	});
+	const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
 
 	if (missing.length !== 0) {
 		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
@@ -222,23 +219,18 @@ const engine = new Engine(GODOT_CONFIG);
 				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
 			}
 			Promise.race([
-				serviceWorkerRegistrationPromise.then((registration) => {
-					if (registration != null) {
-						return Promise.reject(new Error('Service worker already exists.'));
-					}
+				serviceWorkerRegistrationPromise.then(function (registration) {
+					if (registration != null) { return Promise.reject(new Error('Service worker already exists.')); }
 					return registration;
-				}).then(() => engine.installServiceWorker()),
-				new Promise((resolve) => {
-					setTimeout(() => resolve(), 2000);
-				}),
-			]).then(() => {
+				}).then(function () { return engine.installServiceWorker(); }),
+				new Promise(function (resolve) { setTimeout(function () { resolve(); }, 2000); }),
+			]).then(function () {
 				window.location.reload();
-			}).catch((err) => {
+			}).catch(function (err) {
 				console.error('Error while registering service worker:', err);
 			});
 		} else {
-			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
-			displayFailureNotice(missingMsg + missing.join('\n'));
+			displayFailureNotice('Error\nThe following features required to run Godot projects on the Web are missing:\n' + missing.join('\n'));
 		}
 	} else {
 		setStatusMode('progress');
@@ -246,51 +238,88 @@ const engine = new Engine(GODOT_CONFIG);
 			'onProgress': function (current, total) {
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
-					statusProgress.max = total;
+					statusProgress.max   = total;
 				} else {
 					statusProgress.removeAttribute('value');
 					statusProgress.removeAttribute('max');
 				}
 			},
-		}).then(() => {
+		}).then(function () {
 			setStatusMode('hidden');
 		}, displayFailureNotice);
 	}
 }());
 		</script>
 
+		<!-- ── Audio entsperren ────────────────────────────────────
+		     Browser-Autoplay-Policy: Audio darf erst nach einer
+		     User-Geste (Touch/Click) gestartet werden.
+		     Wir registrieren alle drei Events um möglichst früh
+		     zu entsperren – auch wenn das Overlay bereits weggeklickt
+		     wurde bevor Godot fertig geladen hat.              -->
 		<script>
-		// Start-Overlay entfernen beim ersten Antippen.
-		// Entsperrt den Audio-Kontext (Browser-Autoplay-Policy erfordert
-		// eine User-Geste bevor Audio abgespielt werden darf) und
-		// aktiviert Vollbild + Querformat für Mobile.
+		window.addEventListener('load', function () {
+
+			function audioEntsperren() {
+				// Web Audio API entsperren (leeren Buffer abspielen)
+				var AC = window.AudioContext || window.webkitAudioContext;
+				if (AC) {
+					var ctx    = new AC();
+					var buffer = ctx.createBuffer(1, 1, 22050);
+					var source = ctx.createBufferSource();
+					source.buffer = buffer;
+					source.connect(ctx.destination);
+					source.start(0);
+					ctx.resume();
+				}
+
+				// Godot-eigenen Audio-Kontext entsperren (falls API vorhanden)
+				if (window.Engine && typeof Engine.resumeAudioContext === 'function') {
+					Engine.resumeAudioContext();
+				}
+
+				// Listener nach erstem Aufruf entfernen
+				document.removeEventListener('touchstart', audioEntsperren);
+				document.removeEventListener('touchend',   audioEntsperren);
+				document.removeEventListener('click',      audioEntsperren);
+			}
+
+			document.addEventListener('touchstart', audioEntsperren, false);
+			document.addEventListener('touchend',   audioEntsperren, false);
+			document.addEventListener('click',      audioEntsperren, false);
+		});
+		</script>
+
+		<!-- ── Querformat + Vollbild ───────────────────────────────
+		     Versucht Querformat über die Screen Orientation API zu
+		     sperren. Schlägt das fehl (z.B. Desktop-Browser),
+		     greift der CSS-Fallback (@media portrait → rotate).  -->
+		<script>
+		function querformatSperren() {
+			if (screen.orientation && screen.orientation.lock) {
+				screen.orientation.lock('landscape').catch(function (e) {
+					// CSS-Fallback übernimmt – kein Handlungsbedarf
+					console.log('Orientation lock nicht verfügbar – CSS Fallback aktiv', e);
+				});
+			}
+		}
+
+		// Bei jedem Orientierungswechsel erneut versuchen
+		window.addEventListener('orientationchange', querformatSperren);
+		window.addEventListener('load', querformatSperren);
+
+		// Beim ersten Antippen: Vollbild + Querformat anfordern
+		document.addEventListener('touchstart', function () {
+			querformatSperren();
+			var el = document.documentElement;
+			if (el.requestFullscreen)            { el.requestFullscreen(); }
+			else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+		}, { once: true });
+
+		// Start-Overlay ausblenden beim Klick/Tap
 		document.getElementById('start-overlay')
 			.addEventListener('click', function () {
-
-				// Overlay ausblenden
 				this.style.display = 'none';
-
-				// Vollbild anfordern (Android Chrome + Safari)
-				var el = document.documentElement;
-				if (el.requestFullscreen) {
-					el.requestFullscreen();
-				} else if (el.webkitRequestFullscreen) {
-					el.webkitRequestFullscreen();
-				}
-
-				// Querformat erzwingen (schlägt still fehl wenn nicht unterstützt)
-				if (screen.orientation && screen.orientation.lock) {
-					screen.orientation.lock('landscape').catch(function (e) {
-						console.log('Orientation lock:', e);
-					});
-				}
-
-				// Audio-Kontext entsperren damit Godot-Sounds sofort spielen
-				if (typeof AudioContext !== 'undefined') {
-					var audioCtx = new AudioContext();
-					audioCtx.resume();
-				}
-
 			}, { once: true });
 		</script>
 	</body>
